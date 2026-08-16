@@ -1,3 +1,5 @@
+// @ts-ignore
+import pdfParse from 'pdf-parse-fixed';
 import { NextResponse } from 'next/server';
 import pdfParse from 'pdf-parse-fixed';
 import mammoth from 'mammoth';
