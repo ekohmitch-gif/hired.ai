@@ -5,7 +5,7 @@ const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/api/generate(.*)',
-  '/api/checkout(.*)'
+  '/api/checkout(.*)',
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
@@ -16,7 +16,7 @@ export default clerkMiddleware(async (auth, req) => {
 
 export const config = {
   matcher: [
-    '/((?!_next|[^?]*\\.[\\w]+$spin).*)',
+    '/((?!_next|[^?]*\\.[\\w]+$).*)',
     '/(api|trpc)(.*)',
   ],
 };
