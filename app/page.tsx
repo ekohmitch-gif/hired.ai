@@ -1,11 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { SignInButton, UserButton, useUser, ClerkLoaded, ClerkLoading } from '@clerk/nextjs';
 
 export default function Home() {
+  const { isSignedIn, user } = useUser();
+
   const [activeTab, setActiveTab] = useState<'match' | 'build'>('match');
   const [credits, setCredits] = useState<number>(3);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   // Match Mode States
   const [resumeText, setResumeText] = useState('');
@@ -28,7 +32,6 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
 
-  // Load / Initialize Free Credits
   useEffect(() => {
     const savedCredits = localStorage.getItem('hired_ai_credits');
     if (savedCredits !== null) {
@@ -42,6 +45,30 @@ export default function Home() {
     const newCount = credits - 1;
     setCredits(newCount);
     localStorage.setItem('hired_ai_credits', newCount.toString());
+  };
+
+  const handleStripeCheckout = async () => {
+    if (!isSignedIn) {
+      alert('Please sign in first to upgrade your account.');
+      return;
+    }
+
+    setCheckoutLoading(true);
+
+    try {
+      const res = await fetch('/api/checkout', { method: 'POST' });
+      const data = await res.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error || 'Failed to initiate checkout session');
+      }
+    } catch (err: any) {
+      alert(err.message || 'Error connecting to Stripe Checkout');
+    } finally {
+      setCheckoutLoading(false);
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,7 +94,6 @@ export default function Home() {
     }
   };
 
-  // Optimization Handler
   const handleGenerateMatch = async () => {
     if (credits <= 0) {
       setShowPaywall(true);
@@ -99,7 +125,6 @@ export default function Home() {
     }
   };
 
-  // AI Assist Helper for Build Mode
   const handleAIAssistSummary = async () => {
     if (!targetRole) {
       alert('Please enter a Target Job Title / Industry first.');
@@ -127,7 +152,6 @@ export default function Home() {
     }
   };
 
-  // Assemble Manual Build into Preview Result
   const handleCompileBuild = () => {
     if (credits <= 0) {
       setShowPaywall(true);
@@ -165,7 +189,7 @@ export default function Home() {
     <main className="min-h-screen bg-[#0B0F17] text-slate-100 font-sans p-4 md:p-12 print:bg-white print:text-black print:p-0">
       <div className="max-w-7xl mx-auto space-y-8">
 
-        {/* Header */}
+        {/* TOP HEADER */}
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-800/80 pb-6 gap-4 print:hidden">
           <div>
             <h1 className="text-3xl md:text-4xl font-serif font-bold tracking-tight text-white">
@@ -183,11 +207,34 @@ export default function Home() {
             </div>
 
             <button
-              onClick={() => setShowPaywall(true)}
-              className="bg-amber-400 text-slate-950 font-semibold px-4 py-1.5 rounded-full text-xs hover:bg-amber-300 transition"
+              onClick={handleStripeCheckout}
+              disabled={checkoutLoading}
+              className="bg-amber-400 text-slate-950 font-semibold px-4 py-1.5 rounded-full text-xs hover:bg-amber-300 transition disabled:opacity-50"
             >
-              Subscribe / Get Credits
+              {checkoutLoading ? 'Redirecting...' : 'Subscribe / Upgrade'}
             </button>
+
+            {/* Clerk Auth Controls */}
+            <ClerkLoading>
+  <div className="h-8 w-20 bg-slate-800 animate-pulse rounded-md" />
+</ClerkLoading>
+
+<ClerkLoaded>
+  {!isSignedIn ? (
+    <SignInButton mode="modal">
+      <button className="text-xs bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 rounded-md border border-slate-700 font-medium transition-colors">
+        Sign In
+      </button>
+    </SignInButton>
+  ) : (
+    <div className="flex items-center gap-3">
+      <span className="text-xs text-slate-300">
+        {user?.primaryEmailAddress?.emailAddress}
+      </span>
+      <UserButton />
+    </div>
+  )}
+</ClerkLoaded>
           </div>
         </header>
 
@@ -221,7 +268,6 @@ export default function Home() {
           {/* Left Inputs Column */}
           <div className="lg:col-span-5 space-y-6 bg-slate-900/40 backdrop-blur-md border border-slate-800/80 p-6 md:p-8 rounded-2xl shadow-2xl print:hidden">
 
-            {/* TAB 1: MATCH MODE */}
             {activeTab === 'match' && (
               <>
                 <div className="space-y-2">
@@ -277,7 +323,6 @@ export default function Home() {
               </>
             )}
 
-            {/* TAB 2: BUILD MODE */}
             {activeTab === 'build' && (
               <div className="space-y-4">
                 <div>
@@ -417,8 +462,6 @@ export default function Home() {
 
               {result && (
                 <div className="space-y-6 text-xs text-slate-200 print:text-black">
-
-                  {/* Header */}
                   <div className="border-b border-slate-800 print:border-black pb-4 space-y-1">
                     <input
                       type="text"
@@ -434,7 +477,6 @@ export default function Home() {
                     />
                   </div>
 
-                  {/* Summary */}
                   <div className="space-y-2">
                     <h4 className="font-serif italic text-amber-300/90 print:text-slate-900 text-sm font-normal">
                       Professional Summary
@@ -447,7 +489,6 @@ export default function Home() {
                     />
                   </div>
 
-                  {/* Skills */}
                   {result.skills?.length > 0 && (
                     <div className="space-y-2">
                       <h4 className="font-serif italic text-amber-300/90 print:text-slate-900 text-sm font-normal">
@@ -466,7 +507,6 @@ export default function Home() {
                     </div>
                   )}
 
-                  {/* Professional Experience */}
                   {result.experience?.length > 0 && (
                     <div className="space-y-4">
                       <h4 className="font-serif italic text-amber-300/90 print:text-slate-900 text-sm font-normal">
@@ -478,7 +518,7 @@ export default function Home() {
                             <input
                               type="text"
                               className="font-bold text-slate-100 print:text-black bg-transparent outline-none text-xs w-2/3"
-                              value={`${exp.role} — ${exp.company}`}
+                              value={`${exp.role} —${exp.company}`}
                               onChange={(e) => {
                                 const updatedExp = [...result.experience];
                                 const parts = e.target.value.split('—');
@@ -528,14 +568,14 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Subscription Paywall Modal */}
+      {/* Paywall Modal */}
       {showPaywall && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 text-center space-y-6 shadow-2xl">
             <div className="space-y-2">
               <h3 className="text-2xl font-serif text-white font-bold">Free Trial Completed</h3>
               <p className="text-xs text-slate-400">
-                You've used your 3 free resume generations. Upgrade to Hired.ai Pro to get unlimited credits and tailored optimizations.
+                You've used your free resume generations. Upgrade to Hired.ai Pro to get unlimited credits.
               </p>
             </div>
 
@@ -553,10 +593,11 @@ export default function Home() {
 
             <div className="space-y-2">
               <button
-                onClick={() => alert('Redirecting to Stripe Checkout...')}
-                className="w-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold py-3 rounded-xl transition text-xs tracking-wider uppercase"
+                onClick={handleStripeCheckout}
+                disabled={checkoutLoading}
+                className="w-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold py-3 rounded-xl transition text-xs tracking-wider uppercase disabled:opacity-50"
               >
-                Upgrade to Pro
+                {checkoutLoading ? 'Opening Stripe...' : 'Upgrade to Pro'}
               </button>
               <button
                 onClick={() => setShowPaywall(false)}
