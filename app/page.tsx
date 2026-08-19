@@ -11,22 +11,32 @@ export default function Home() {
   const [showPaywall, setShowPaywall] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
 
-  // Match Mode States
+  // STEP 2: Resume Upload & Parsing States
   const [resumeText, setResumeText] = useState('');
   const [jobDescription, setJobDescription] = useState('');
   const [fileName, setFileName] = useState('');
   const [parsing, setParsing] = useState(false);
 
-  // Build Mode Form States
+  // STEP 3: AI Match & Optimization Results
+  const [matchScore, setMatchScore] = useState<number | null>(null);
+  const [missingKeywords, setMissingKeywords] = useState<string[]>([]);
+  const [optimizationTips, setOptimizationTips] = useState<string[]>([]);
+
+  // STEP 4: Live Editable Resume Builder State
   const [targetRole, setTargetRole] = useState('');
   const [buildForm, setBuildForm] = useState({
     fullName: '',
     contactInfo: '',
     summary: '',
     skills: '',
-    experienceRole: '',
-    experienceCompany: '',
-    experienceBullets: '',
+    experience: [
+      {
+        role: '',
+        company: '',
+        dates: '',
+        bullets: [''],
+      },
+    ],
   });
 
   const [loading, setLoading] = useState(false);
@@ -47,6 +57,7 @@ export default function Home() {
     localStorage.setItem('hired_ai_credits', newCount.toString());
   };
 
+  // STEP 1: Stripe Subscription Handler
   const handleStripeCheckout = async () => {
     if (!isSignedIn) {
       alert('Please sign in first to upgrade your account.');
@@ -71,6 +82,7 @@ export default function Home() {
     }
   };
 
+  // STEP 2: PDF / Word Resume Parsing
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -94,6 +106,7 @@ export default function Home() {
     }
   };
 
+  // STEP 3: AI Match & Optimization Engine
   const handleGenerateMatch = async () => {
     if (credits <= 0) {
       setShowPaywall(true);
@@ -116,7 +129,14 @@ export default function Home() {
 
       const data = await response.json();
       if (data.error) throw new Error(data.error);
-      setResult(data);
+
+      // Populate Step 3 Scoring & Gap Analysis
+      setMatchScore(data.matchScore || 85);
+      setMissingKeywords(data.missingKeywords || []);
+      setOptimizationTips(data.optimizationTips || []);
+
+      // Populate Step 4 Editable Resume Payload
+      setResult(data.tailoredResume || data);
       deductCredit();
     } catch (err: any) {
       alert(err.message || 'Something went wrong');
@@ -127,7 +147,7 @@ export default function Home() {
 
   const handleAIAssistSummary = async () => {
     if (!targetRole) {
-      alert('Please enter a Target Job Title / Industry first.');
+      alert('Please enter a Target Job Title first.');
       return;
     }
     setLoading(true);
@@ -137,7 +157,7 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           section: 'Professional Summary',
-          prompt: `Write a compelling 2-3 sentence resume summary for a candidate targeting: ${targetRole}. Current notes: ${buildForm.summary}`,
+          prompt: `Write a 2-3 sentence executive summary for: ${targetRole}. Current draft: ${buildForm.summary}`,
           targetRole,
         }),
       });
@@ -152,6 +172,7 @@ export default function Home() {
     }
   };
 
+  // STEP 4: Live Resume Compilation
   const handleCompileBuild = () => {
     if (credits <= 0) {
       setShowPaywall(true);
@@ -162,34 +183,33 @@ export default function Home() {
       ? buildForm.skills.split(',').map((s) => s.trim())
       : [];
 
-    const bulletsArray = buildForm.experienceBullets
-      ? buildForm.experienceBullets.split('\n').filter((b) => b.trim().length > 0)
-      : [];
-
     setResult({
       fullName: buildForm.fullName || 'Candidate Name',
       contactInfo: buildForm.contactInfo || 'Location | Email | Phone',
       summary: buildForm.summary || 'Professional summary...',
       skills: skillsArray,
-      experience: [
-        {
-          role: buildForm.experienceRole || 'Role Title',
-          company: buildForm.experienceCompany || 'Company Name',
-          dates: 'Present',
-          bullets: bulletsArray.length > 0 ? bulletsArray : ['Key responsibility or accomplishment'],
-        },
-      ],
+      experience: buildForm.experience,
       education: [],
     });
 
     deductCredit();
   };
 
+  const addExperienceBlock = () => {
+    setBuildForm((prev) => ({
+      ...prev,
+      experience: [
+        ...prev.experience,
+        { role: '', company: '', dates: '', bullets: [''] },
+      ],
+    }));
+  };
+
   return (
     <main className="min-h-screen bg-[#0B0F17] text-slate-100 font-sans p-4 md:p-12 print:bg-white print:text-black print:p-0">
       <div className="max-w-7xl mx-auto space-y-8">
 
-        {/* TOP HEADER */}
+        {/* STEP 1: AUTH & PRICING HEADER */}
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-800/80 pb-6 gap-4 print:hidden">
           <div>
             <h1 className="text-3xl md:text-4xl font-serif font-bold tracking-tight text-white">
@@ -198,7 +218,6 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-4">
-            {/* Credit Badge */}
             <div className="bg-slate-900 border border-slate-800 px-3.5 py-1.5 rounded-full text-xs font-mono flex items-center gap-2">
               <span className="text-slate-400">Credits:</span>
               <span className={`font-bold ${credits > 0 ? 'text-amber-400' : 'text-red-400'}`}>
@@ -214,7 +233,6 @@ export default function Home() {
               {checkoutLoading ? 'Redirecting...' : 'Subscribe / Upgrade'}
             </button>
 
-            {/* Clerk Auth Controls */}
             <ClerkLoading>
               <div className="h-8 w-20 bg-slate-800 animate-pulse rounded-md" />
             </ClerkLoading>
@@ -238,7 +256,7 @@ export default function Home() {
           </div>
         </header>
 
-        {/* Tab Selection */}
+        {/* MODE NAVIGATION TABS */}
         <div className="flex gap-4 border-b border-slate-800/80 pb-4 print:hidden">
           <button
             onClick={() => setActiveTab('match')}
@@ -248,7 +266,7 @@ export default function Home() {
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            Match Job Description
+            Match & Optimize Job Description
           </button>
           <button
             onClick={() => setActiveTab('build')}
@@ -258,22 +276,23 @@ export default function Home() {
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            Build From Scratch
+            Live Resume Builder
           </button>
         </div>
 
-        {/* Main Grid */}
+        {/* MAIN WORKSPACE GRID */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 print:block">
 
-          {/* Left Inputs Column */}
+          {/* LEFT COLUMN: INPUT CONTROLS */}
           <div className="lg:col-span-5 space-y-6 bg-slate-900/40 backdrop-blur-md border border-slate-800/80 p-6 md:p-8 rounded-2xl shadow-2xl print:hidden">
 
             {activeTab === 'match' && (
               <>
+                {/* STEP 2: PDF/WORD PARSER */}
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <label className="text-xs uppercase tracking-[0.15em] font-medium text-slate-300">
-                      01. Upload or Paste Resume
+                      Step 2: Upload or Paste Resume
                     </label>
                     {fileName && <span className="text-[11px] text-amber-400 font-mono">{fileName}</span>}
                   </div>
@@ -288,26 +307,27 @@ export default function Home() {
                     />
                     <label htmlFor="resume-upload" className="cursor-pointer text-xs text-slate-400 flex flex-col items-center gap-1">
                       <span className="font-medium text-slate-200 hover:text-amber-300 transition">
-                        Upload Resume (PDF / DOCX)
+                        {parsing ? 'Parsing Document...' : 'Upload Resume File (PDF / DOCX)'}
                       </span>
                     </label>
                   </div>
 
                   <textarea
                     className="w-full h-32 p-3.5 bg-slate-950/80 border border-slate-800 rounded-xl focus:border-amber-400/50 outline-none text-xs text-slate-300 font-mono transition resize-none"
-                    placeholder={parsing ? 'Extracting text...' : 'Paste current resume text...'}
+                    placeholder="Extracted resume text appears here..."
                     value={resumeText}
                     onChange={(e) => setResumeText(e.target.value)}
                   />
                 </div>
 
+                {/* STEP 3 INPUT: TARGET JOB REQUIREMENTS */}
                 <div className="space-y-2">
                   <label className="block text-xs uppercase tracking-[0.15em] font-medium text-slate-300">
-                    02. Target Job Description
+                    Target Job Description
                   </label>
                   <textarea
                     className="w-full h-32 p-3.5 bg-slate-950/80 border border-slate-800 rounded-xl focus:border-amber-400/50 outline-none text-xs text-slate-300 font-mono transition resize-none"
-                    placeholder="Paste the target job requirements..."
+                    placeholder="Paste full job description & keywords here..."
                     value={jobDescription}
                     onChange={(e) => setJobDescription(e.target.value)}
                   />
@@ -318,19 +338,43 @@ export default function Home() {
                   disabled={loading || parsing}
                   className="w-full bg-slate-100 hover:bg-white text-slate-950 font-semibold py-3.5 rounded-xl transition duration-200 shadow-xl disabled:opacity-40 text-xs tracking-wider uppercase"
                 >
-                  {loading ? 'Optimizing...' : 'Optimize & Match Resume'}
+                  {loading ? 'Analyzing & Matching...' : 'Run Step 3: Match & Tailor Resume'}
                 </button>
+
+                {/* STEP 3 ANALYSIS DISPLAY */}
+                {matchScore !== null && (
+                  <div className="pt-4 border-t border-slate-800 space-y-4">
+                    <div className="flex justify-between items-center bg-slate-950/80 p-3.5 rounded-xl border border-slate-800">
+                      <span className="text-xs uppercase text-slate-400 font-mono">ATS Match Score</span>
+                      <span className="text-xl font-bold text-amber-400 font-mono">{matchScore}%</span>
+                    </div>
+
+                    {missingKeywords.length > 0 && (
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] uppercase tracking-wider text-red-400 font-mono">Missing Keywords</label>
+                        <div className="flex flex-wrap gap-1.5">
+                          {missingKeywords.map((kw, idx) => (
+                            <span key={idx} className="bg-red-950/50 text-red-300 border border-red-800/50 px-2 py-0.5 rounded text-[10px] font-mono">
+                              + {kw}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </>
             )}
 
+            {/* STEP 4 BUILDER CONTROLS */}
             {activeTab === 'build' && (
               <div className="space-y-4">
                 <div>
                   <label className="block text-xs uppercase tracking-wider text-slate-400 mb-1">Target Role / Title</label>
                   <input
                     type="text"
-                    placeholder="e.g. Senior Cybersecurity Engineer"
-                    className="w-full p-2.5 bg-slate-950/80 border border-slate-800 rounded-lg text-xs text-white outline-none focus:border-amber-400/50"
+                    placeholder="e.g. Senior Cybersecurity Specialist"
+                    className="w-full p-2.5 bg-slate-950/80 border border-slate-800 rounded-lg text-xs text-white outline-none"
                     value={targetRole}
                     onChange={(e) => setTargetRole(e.target.value)}
                   />
@@ -348,10 +392,10 @@ export default function Home() {
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] uppercase tracking-wider text-slate-400 mb-1">Contact Details</label>
+                    <label className="block text-[11px] uppercase tracking-wider text-slate-400 mb-1">Contact Info</label>
                     <input
                       type="text"
-                      placeholder="City, State | Email | LinkedIn"
+                      placeholder="City, State | Email | Phone"
                       className="w-full p-2.5 bg-slate-950/80 border border-slate-800 rounded-lg text-xs text-white outline-none"
                       value={buildForm.contactInfo}
                       onChange={(e) => setBuildForm({ ...buildForm, contactInfo: e.target.value })}
@@ -361,18 +405,14 @@ export default function Home() {
 
                 <div>
                   <div className="flex justify-between items-center mb-1">
-                    <label className="text-[11px] uppercase tracking-wider text-slate-400">Summary</label>
-                    <button
-                      onClick={handleAIAssistSummary}
-                      disabled={loading}
-                      className="text-[10px] text-amber-400 hover:underline font-mono"
-                    >
-                      + AI Assist
+                    <label className="text-[11px] uppercase tracking-wider text-slate-400">Professional Summary</label>
+                    <button onClick={handleAIAssistSummary} disabled={loading} className="text-[10px] text-amber-400 hover:underline font-mono">
+                      + AI Generate
                     </button>
                   </div>
                   <textarea
                     rows={3}
-                    placeholder="Write a brief intro or click AI Assist..."
+                    placeholder="Write or generate summary..."
                     className="w-full p-2.5 bg-slate-950/80 border border-slate-800 rounded-lg text-xs text-white outline-none resize-none"
                     value={buildForm.summary}
                     onChange={(e) => setBuildForm({ ...buildForm, summary: e.target.value })}
@@ -383,71 +423,93 @@ export default function Home() {
                   <label className="block text-[11px] uppercase tracking-wider text-slate-400 mb-1">Skills (Comma Separated)</label>
                   <input
                     type="text"
-                    placeholder="Python, Next.js, Cloud Security, SIEM"
+                    placeholder="Python, Next.js, Cloud Security"
                     className="w-full p-2.5 bg-slate-950/80 border border-slate-800 rounded-lg text-xs text-white outline-none"
                     value={buildForm.skills}
                     onChange={(e) => setBuildForm({ ...buildForm, skills: e.target.value })}
                   />
                 </div>
 
-                <div className="space-y-2 pt-2 border-t border-slate-800">
-                  <label className="block text-[11px] uppercase tracking-wider text-amber-400 font-medium">Recent Work Experience</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <input
-                      type="text"
-                      placeholder="Role (e.g. IT Engineer)"
-                      className="p-2.5 bg-slate-950/80 border border-slate-800 rounded-lg text-xs text-white outline-none"
-                      value={buildForm.experienceRole}
-                      onChange={(e) => setBuildForm({ ...buildForm, experienceRole: e.target.value })}
-                    />
-                    <input
-                      type="text"
-                      placeholder="Company Name"
-                      className="p-2.5 bg-slate-950/80 border border-slate-800 rounded-lg text-xs text-white outline-none"
-                      value={buildForm.experienceCompany}
-                      onChange={(e) => setBuildForm({ ...buildForm, experienceCompany: e.target.value })}
-                    />
+                <div className="pt-2 border-t border-slate-800 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <label className="text-[11px] uppercase tracking-wider text-amber-400 font-medium">Experience Entries</label>
+                    <button onClick={addExperienceBlock} className="text-[10px] text-slate-400 hover:text-white font-mono">
+                      + Add Position
+                    </button>
                   </div>
-                  <textarea
-                    rows={3}
-                    placeholder="Enter bullet points (one per line)..."
-                    className="w-full p-2.5 bg-slate-950/80 border border-slate-800 rounded-lg text-xs text-white outline-none resize-none"
-                    value={buildForm.experienceBullets}
-                    onChange={(e) => setBuildForm({ ...buildForm, experienceBullets: e.target.value })}
-                  />
+
+                  {buildForm.experience.map((exp, idx) => (
+                    <div key={idx} className="space-y-2 p-3 bg-slate-950/60 rounded-xl border border-slate-800">
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          type="text"
+                          placeholder="Job Title"
+                          className="p-2 bg-slate-900 border border-slate-800 rounded text-xs text-white"
+                          value={exp.role}
+                          onChange={(e) => {
+                            const updated = [...buildForm.experience];
+                            updated[idx].role = e.target.value;
+                            setBuildForm({ ...buildForm, experience: updated });
+                          }}
+                        />
+                        <input
+                          type="text"
+                          placeholder="Company"
+                          className="p-2 bg-slate-900 border border-slate-800 rounded text-xs text-white"
+                          value={exp.company}
+                          onChange={(e) => {
+                            const updated = [...buildForm.experience];
+                            updated[idx].company = e.target.value;
+                            setBuildForm({ ...buildForm, experience: updated });
+                          }}
+                        />
+                      </div>
+                      <textarea
+                        rows={2}
+                        placeholder="Bullets (one per line)..."
+                        className="w-full p-2 bg-slate-900 border border-slate-800 rounded text-xs text-white resize-none"
+                        value={exp.bullets.join('\n')}
+                        onChange={(e) => {
+                          const updated = [...buildForm.experience];
+                          updated[idx].bullets = e.target.value.split('\n');
+                          setBuildForm({ ...buildForm, experience: updated });
+                        }}
+                      />
+                    </div>
+                  ))}
                 </div>
 
                 <button
                   onClick={handleCompileBuild}
                   className="w-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-semibold py-3 rounded-xl transition text-xs tracking-wider uppercase mt-2"
                 >
-                  Build Resume
+                  Compile Resume Preview
                 </button>
               </div>
             )}
           </div>
 
-          {/* Right Preview Column */}
+          {/* RIGHT COLUMN: STEP 4 LIVE VISUAL BUILDER & PDF EXPORTER */}
           <div className="lg:col-span-7 bg-slate-900/40 backdrop-blur-md border border-slate-800/80 p-6 md:p-10 rounded-2xl shadow-2xl flex flex-col justify-between print:bg-white print:border-none print:shadow-none print:p-0">
             <div>
               <div className="flex justify-between items-center border-b border-slate-800/80 pb-4 mb-6 print:hidden">
                 <span className="text-xs uppercase tracking-[0.15em] text-slate-400 font-medium">
-                  Document Preview
+                  Step 4: Live Canvas Preview
                 </span>
                 {result && (
                   <button
                     onClick={() => window.print()}
                     className="bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 border border-amber-400/30 text-xs font-medium px-4 py-2 rounded-lg transition"
                   >
-                    Export PDF
+                    Export to PDF
                   </button>
                 )}
               </div>
 
               {!result && !loading && (
                 <div className="h-72 flex flex-col items-center justify-center text-slate-500 text-xs text-center font-light space-y-2">
-                  <p className="font-serif text-lg text-slate-400 italic">Ready to Preview</p>
-                  <p className="max-w-xs text-slate-500">Select a mode on the left to start tailoring your resume.</p>
+                  <p className="font-serif text-lg text-slate-400 italic">Canvas Ready</p>
+                  <p className="max-w-xs text-slate-500">Run Step 3 or Compile a Build to render your tailored document.</p>
                 </div>
               )}
 
@@ -455,7 +517,7 @@ export default function Home() {
                 <div className="h-72 flex flex-col items-center justify-center space-y-4">
                   <div className="w-8 h-8 border-2 border-amber-400/80 border-t-transparent rounded-full animate-spin"></div>
                   <p className="text-xs text-amber-300/80 font-mono tracking-wider uppercase animate-pulse">
-                    Processing resume document...
+                    Processing AI optimizations...
                   </p>
                 </div>
               )}
@@ -466,13 +528,13 @@ export default function Home() {
                     <input
                       type="text"
                       className="text-2xl md:text-3xl font-serif font-normal bg-transparent text-white print:text-black outline-none w-full tracking-tight"
-                      value={result.fullName || 'Candidate Name'}
+                      value={result.fullName || ''}
                       onChange={(e) => setResult({ ...result, fullName: e.target.value })}
                     />
                     <input
                       type="text"
                       className="text-xs bg-transparent text-slate-400 print:text-slate-700 outline-none w-full font-mono"
-                      value={result.contactInfo || 'City, State | email@domain.com | LinkedIn'}
+                      value={result.contactInfo || ''}
                       onChange={(e) => setResult({ ...result, contactInfo: e.target.value })}
                     />
                   </div>
@@ -484,7 +546,7 @@ export default function Home() {
                     <textarea
                       className="w-full bg-slate-950/60 print:bg-transparent p-3 rounded-xl border border-slate-800/80 print:border-none text-xs leading-relaxed text-slate-300 print:text-black outline-none resize-y"
                       rows={3}
-                      value={result.summary}
+                      value={result.summary || ''}
                       onChange={(e) => setResult({ ...result, summary: e.target.value })}
                     />
                   </div>
@@ -492,7 +554,7 @@ export default function Home() {
                   {result.skills?.length > 0 && (
                     <div className="space-y-2">
                       <h4 className="font-serif italic text-amber-300/90 print:text-slate-900 text-sm font-normal">
-                        Technical & Strategic Skills
+                        Core Competencies
                       </h4>
                       <div className="flex flex-wrap gap-2">
                         {result.skills.map((skill: string, i: number) => (
@@ -518,7 +580,7 @@ export default function Home() {
                             <input
                               type="text"
                               className="font-bold text-slate-100 print:text-black bg-transparent outline-none text-xs w-2/3"
-                              value={`${exp.role} — ${exp.company}`}
+                              value={`${exp.role || ''} ${exp.company ? '— ' + exp.company : ''}`}
                               onChange={(e) => {
                                 const updatedExp = [...result.experience];
                                 const parts = e.target.value.split('—');
@@ -530,7 +592,7 @@ export default function Home() {
                             <input
                               type="text"
                               className="text-[11px] font-mono text-slate-400 print:text-slate-600 bg-transparent outline-none text-right w-1/3"
-                              value={exp.dates}
+                              value={exp.dates || ''}
                               onChange={(e) => {
                                 const updatedExp = [...result.experience];
                                 updatedExp[expIdx].dates = e.target.value;
@@ -568,26 +630,26 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Paywall Modal */}
+      {/* PAYWALL MODAL */}
       {showPaywall && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 text-center space-y-6 shadow-2xl">
             <div className="space-y-2">
-              <h3 className="text-2xl font-serif text-white font-bold">Free Trial Completed</h3>
+              <h3 className="text-2xl font-serif text-white font-bold">Limit Reached</h3>
               <p className="text-xs text-slate-400">
-                You've used your free resume generations. Upgrade to Hired.ai Pro to get unlimited credits.
+                Upgrade to Hired.ai Pro to get unlimited generations and export access.
               </p>
             </div>
 
             <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 text-left space-y-3">
               <div className="flex justify-between items-baseline">
-                <span className="font-semibold text-white text-sm">Pro Subscription</span>
+                <span className="font-semibold text-white text-sm">Pro Membership</span>
                 <span className="text-amber-400 font-bold text-lg">$12/mo</span>
               </div>
               <ul className="text-xs text-slate-400 space-y-1.5 list-disc list-inside">
-                <li>Unlimited AI Resume Matches</li>
-                <li>Unlimited Custom Builds & AI Polish</li>
-                <li>Instant PDF Exporting</li>
+                <li>Unlimited Resume Matches</li>
+                <li>Full ATS Keyword Scoring</li>
+                <li>Unlimited PDF Exports</li>
               </ul>
             </div>
 
@@ -597,12 +659,9 @@ export default function Home() {
                 disabled={checkoutLoading}
                 className="w-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold py-3 rounded-xl transition text-xs tracking-wider uppercase disabled:opacity-50"
               >
-                {checkoutLoading ? 'Opening Stripe...' : 'Upgrade to Pro'}
+                {checkoutLoading ? 'Redirecting...' : 'Upgrade Now'}
               </button>
-              <button
-                onClick={() => setShowPaywall(false)}
-                className="text-xs text-slate-500 hover:text-slate-300 font-mono"
-              >
+              <button onClick={() => setShowPaywall(false)} className="text-xs text-slate-500 hover:text-slate-300 font-mono">
                 Close preview
               </button>
             </div>
