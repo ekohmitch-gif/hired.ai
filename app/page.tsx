@@ -216,25 +216,25 @@ export default function Home() {
 
             {/* Clerk Auth Controls */}
             <ClerkLoading>
-  <div className="h-8 w-20 bg-slate-800 animate-pulse rounded-md" />
-</ClerkLoading>
+              <div className="h-8 w-20 bg-slate-800 animate-pulse rounded-md" />
+            </ClerkLoading>
 
-<ClerkLoaded>
-  {!isSignedIn ? (
-    <SignInButton mode="modal">
-      <button className="text-xs bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 rounded-md border border-slate-700 font-medium transition-colors">
-        Sign In
-      </button>
-    </SignInButton>
-  ) : (
-    <div className="flex items-center gap-3">
-      <span className="text-xs text-slate-300">
-        {user?.primaryEmailAddress?.emailAddress}
-      </span>
-      <UserButton />
-    </div>
-  )}
-</ClerkLoaded>
+            <ClerkLoaded>
+              {!isSignedIn ? (
+                <SignInButton mode="modal">
+                  <button className="text-xs bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 rounded-md border border-slate-700 font-medium transition-colors">
+                    Sign In
+                  </button>
+                </SignInButton>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-slate-300">
+                    {user?.primaryEmailAddress?.emailAddress}
+                  </span>
+                  <UserButton />
+                </div>
+              )}
+            </ClerkLoaded>
           </div>
         </header>
 
@@ -518,7 +518,7 @@ export default function Home() {
                             <input
                               type="text"
                               className="font-bold text-slate-100 print:text-black bg-transparent outline-none text-xs w-2/3"
-                              value={`${exp.role} —${exp.company}`}
+                              value={`${exp.role} — ${exp.company}`}
                               onChange={(e) => {
                                 const updatedExp = [...result.experience];
                                 const parts = e.target.value.split('—');
