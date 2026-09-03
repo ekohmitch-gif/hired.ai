@@ -25,13 +25,37 @@ export async function POST(req: Request) {
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as any;
     const userId = session.metadata?.userId;
+    const subscriptionId = session.subscription;
 
     if (userId) {
-      // Grant unlimited credits or set tier to Pro in user metadata
       await clerkClient.users.updateUserMetadata(userId, {
         publicMetadata: {
           isPro: true,
           credits: 999,
+          stripeSubscriptionId: subscriptionId,
+        },
+      });
+    }
+  }
+
+  if (
+    event.type === 'customer.subscription.deleted' ||
+    event.type === 'customer.subscription.updated'
+  ) {
+    const subscription = event.data.object as any;
+    const isActive = subscription.status === 'active' || subscription.status === 'trialing';
+
+    const users = await clerkClient.users.getUserList({ limit: 500 });
+    const match = users.data.find(
+      (u) => u.publicMetadata?.stripeSubscriptionId === subscription.id
+    );
+
+    if (match) {
+      await clerkClient.users.updateUserMetadata(match.id, {
+        publicMetadata: {
+          ...match.publicMetadata,
+          isPro: isActive,
+          ...(isActive ? {} : { credits: 10 }),
         },
       });
     }

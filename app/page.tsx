@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { SignInButton, UserButton, useUser, ClerkLoaded } from '@clerk/nextjs';
 
 interface ExperienceItem {
@@ -13,11 +13,13 @@ interface ExperienceItem {
 export default function Home() {
   const { user, isSignedIn } = useUser();
 
+  const isSubscribed = user?.publicMetadata?.isPro === true;
+  const rezPoints =
+    typeof user?.publicMetadata?.credits === 'number'
+      ? (user.publicMetadata.credits as number)
+      : 10;
+
   const [activeTab, setActiveTab] = useState<'match' | 'build'>('match');
-  const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
-  
-  // Replaced scansRemaining with rezPoints
-  const [rezPoints, setRezPoints] = useState<number>(10);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   const [resumeText, setResumeText] = useState<string>('');
@@ -27,6 +29,7 @@ export default function Home() {
 
   const [targetRole, setTargetRole] = useState<string>('');
   const [refiningSummary, setRefiningSummary] = useState(false);
+  const [exportingFormat, setExportingFormat] = useState<'pdf' | 'docx' | null>(null);
   const [buildForm, setBuildForm] = useState({
     fullName: '',
     email: '',
@@ -48,23 +51,6 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const resumeRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const savedPoints = localStorage.getItem('enhancerez_points');
-    if (savedPoints !== null) {
-      setRezPoints(parseInt(savedPoints, 10));
-    } else {
-      localStorage.setItem('enhancerez_points', '10');
-    }
-  }, []);
-
-  const handlePointDeduction = (cost: number = 1) => {
-    if (!isSubscribed) {
-      const newBalance = Math.max(0, rezPoints - cost);
-      setRezPoints(newBalance);
-      localStorage.setItem('enhancerez_points', newBalance.toString());
-    }
-  };
 
   const handleStripeCheckout = async () => {
     if (!isSignedIn) return alert('Please sign in first.');
@@ -99,6 +85,7 @@ export default function Home() {
   };
 
   const handleGenerateMatch = async () => {
+    if (!isSignedIn) return alert('Please sign in first.');
     if (!isSubscribed && rezPoints <= 0) {
       return alert('You are out of Rez Points! Upgrade to refill or get unlimited access.');
     }
@@ -111,8 +98,12 @@ export default function Home() {
         body: JSON.stringify({ resumeText, jobDescription }),
       });
       const data = await response.json();
-      setResult(data.tailoredResume || data);
-      handlePointDeduction(1);
+      if (!response.ok) {
+        alert(data.error || 'Something went wrong');
+        return;
+      }
+      setResult(data);
+      await user?.reload();
     } catch {
       alert('Something went wrong');
     } finally {
@@ -176,9 +167,6 @@ export default function Home() {
   };
 
   const handleCompileBuild = () => {
-    if (!isSubscribed && rezPoints <= 0) {
-      return alert('You are out of Rez Points! Upgrade to continue.');
-    }
     const skillsArray = buildForm.skills ? buildForm.skills.split(',').map((s) => s.trim()) : [];
     const contactParts = [buildForm.location, buildForm.email, buildForm.phone, buildForm.linkedin].filter(Boolean);
     setResult({
@@ -188,7 +176,36 @@ export default function Home() {
       skills: skillsArray,
       experience: buildForm.experience,
     });
-    handlePointDeduction(1);
+  };
+
+  const handleExport = async (format: 'pdf' | 'docx') => {
+    if (!result) return;
+    setExportingFormat(format);
+    try {
+      const res = await fetch('/api/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ result, format }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || 'Export failed');
+        return;
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${(result.fullName || 'resume').replace(/\s+/g, '_')}.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      alert('Export failed');
+    } finally {
+      setExportingFormat(null);
+    }
   };
 
   return (
@@ -444,9 +461,22 @@ export default function Home() {
             <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4 print:hidden">
               <span className="text-xs uppercase text-slate-400">Live Preview</span>
               {result && (
-                <button onClick={() => window.print()} className="bg-amber-400 text-slate-950 text-xs font-semibold px-3 py-1 rounded hover:bg-amber-300 transition">
-                  Export PDF
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleExport('pdf')}
+                    disabled={exportingFormat !== null}
+                    className="bg-amber-400 text-slate-950 text-xs font-semibold px-3 py-1 rounded hover:bg-amber-300 transition disabled:opacity-60"
+                  >
+                    {exportingFormat === 'pdf' ? 'Preparing...' : 'Download PDF'}
+                  </button>
+                  <button
+                    onClick={() => handleExport('docx')}
+                    disabled={exportingFormat !== null}
+                    className="bg-slate-800 text-slate-200 text-xs font-semibold px-3 py-1 rounded hover:bg-slate-700 transition border border-slate-700 disabled:opacity-60"
+                  >
+                    {exportingFormat === 'docx' ? 'Preparing...' : 'Download DOCX'}
+                  </button>
+                </div>
               )}
             </div>
 
