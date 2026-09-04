@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
-import { auth, clerkClient } from '@clerk/nextjs/server';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -8,27 +7,8 @@ const openai = new OpenAI({
 
 export async function POST(req: Request) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Please sign in to continue.' }, { status: 401 });
-    }
-
-    const client = await clerkClient();
-    const user = await client.users.getUser(userId);
-    const isPro = user.publicMetadata?.isPro === true;
-    let credits =
-      typeof user.publicMetadata?.credits === 'number'
-        ? (user.publicMetadata.credits as number)
-        : 10;
-
-    if (!isPro && credits <= 0) {
-      return NextResponse.json(
-        { error: 'Out of Rez Points. Upgrade to continue.' },
-        { status: 402 }
-      );
-    }
-
     const { resumeText, jobDescription } = await req.json();
+
     if (!resumeText || !jobDescription) {
       return NextResponse.json(
         { error: 'Missing resume text or job description' },
@@ -107,19 +87,7 @@ You MUST return your response ONLY in valid JSON matching this exact structure:
     });
 
     const result = JSON.parse(completion.choices[0].message.content || '{}');
-
-    if (!isPro) {
-      credits -= 1;
-      await client.users.updateUserMetadata(userId, {
-        publicMetadata: { ...user.publicMetadata, credits },
-      });
-    }
-
-    return NextResponse.json({
-      ...result,
-      isPro,
-      remainingCredits: isPro ? null : credits,
-    });
+    return NextResponse.json(result);
   } catch (error: any) {
     console.error('Error generating resume:', error);
     return NextResponse.json(

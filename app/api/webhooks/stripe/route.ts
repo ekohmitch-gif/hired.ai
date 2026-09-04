@@ -55,7 +55,9 @@ export async function POST(req: Request) {
         publicMetadata: {
           ...match.publicMetadata,
           isPro: isActive,
-          ...(isActive ? {} : { credits: 10 }),
+          ...(isActive
+            ? {}
+            : { credits: 3, creditsResetAt: new Date().toISOString() }),
         },
       });
     }
