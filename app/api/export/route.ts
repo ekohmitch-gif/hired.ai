@@ -2,14 +2,15 @@ import { NextResponse } from 'next/server';
 import { auth, clerkClient } from '@clerk/nextjs/server';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
 import { renderToBuffer } from '@react-pdf/renderer';
-import { ResumePdfDocument } from '@/lib/ResumePdfDocument';
+import { ResumePdfDocument, ResumeTemplate } from '@/lib/ResumePdfDocument';
+import { CoverLetterPdfDocument } from '@/lib/CoverLetterPdfDocument';
 import { computeCreditState } from '@/lib/credits';
 
 export async function POST(req: Request) {
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Please sign in to download your resume.' }, { status: 401 });
+      return NextResponse.json({ error: 'Please sign in to download.' }, { status: 401 });
     }
 
     const client = await clerkClient();
@@ -23,30 +24,56 @@ export async function POST(req: Request) {
       );
     }
 
-    const { result, format } = await req.json();
-    if (!result) {
-      return NextResponse.json({ error: 'Missing resume data' }, { status: 400 });
-    }
+    const body = await req.json();
+    const { format, docType } = body;
+    const isCoverLetter = docType === 'coverLetter';
 
-    const safeName = (result.fullName || 'resume').replace(/\s+/g, '_');
+    // Premium-only: non-classic templates
+    const template: ResumeTemplate = body.template === 'modern' || body.template === 'minimal'
+      ? (state.isPro ? body.template : 'classic')
+      : 'classic';
 
     let buffer: Buffer;
     let contentType: string;
     let filename: string;
 
-    if (format === 'docx') {
-      buffer = await buildDocx(result);
-      contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-      filename = `${safeName}.docx`;
-    } else if (format === 'pdf') {
-      buffer = await renderToBuffer(ResumePdfDocument({ result }));
-      contentType = 'application/pdf';
-      filename = `${safeName}.pdf`;
+    if (isCoverLetter) {
+      const { fullName, contactInfo, coverLetterBody } = body;
+      const safeName = (fullName || 'cover_letter').replace(/\s+/g, '_');
+
+      if (format === 'docx') {
+        buffer = await buildCoverLetterDocx(fullName, contactInfo, coverLetterBody);
+        contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+        filename = `${safeName}_cover_letter.docx`;
+      } else if (format === 'pdf') {
+        buffer = await renderToBuffer(
+          CoverLetterPdfDocument({ fullName, contactInfo, body: coverLetterBody })
+        );
+        contentType = 'application/pdf';
+        filename = `${safeName}_cover_letter.pdf`;
+      } else {
+        return NextResponse.json({ error: 'Invalid format' }, { status: 400 });
+      }
     } else {
-      return NextResponse.json({ error: 'Invalid format' }, { status: 400 });
+      const { result } = body;
+      if (!result) {
+        return NextResponse.json({ error: 'Missing resume data' }, { status: 400 });
+      }
+      const safeName = (result.fullName || 'resume').replace(/\s+/g, '_');
+
+      if (format === 'docx') {
+        buffer = await buildDocx(result);
+        contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+        filename = `${safeName}.docx`;
+      } else if (format === 'pdf') {
+        buffer = await renderToBuffer(ResumePdfDocument({ result, template }));
+        contentType = 'application/pdf';
+        filename = `${safeName}.pdf`;
+      } else {
+        return NextResponse.json({ error: 'Invalid format' }, { status: 400 });
+      }
     }
 
-    // Deduct only after the file was built successfully
     if (!state.isPro) {
       await client.users.updateUserMetadata(userId, {
         publicMetadata: {
@@ -83,7 +110,7 @@ async function buildDocx(result: any) {
 
   if (result.skills?.length) {
     children.push(new Paragraph({ text: 'Core Competencies', heading: HeadingLevel.HEADING_2, spacing: { before: 200 } }));
-    children.push(new Paragraph({ text: result.skills.join(' | ') }));
+    children.push(new Paragraph({ text: result.skills.join('   •   ') }));
   }
 
   if (result.experience?.length) {
@@ -117,6 +144,23 @@ async function buildDocx(result: any) {
       );
     });
   }
+
+  const doc = new Document({ sections: [{ children }] });
+  return Packer.toBuffer(doc);
+}
+
+async function buildCoverLetterDocx(fullName: string, contactInfo: string, body: string) {
+  const children: Paragraph[] = [];
+  const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  children.push(new Paragraph({ text: fullName || 'Candidate Name', heading: HeadingLevel.HEADING_1 }));
+  children.push(new Paragraph({ children: [new TextRun({ text: contactInfo || '', italics: true })] }));
+  children.push(new Paragraph({ text: today, spacing: { before: 200, after: 200 } }));
+
+  const paragraphs = (body || '').split(/\n\s*\n/).filter(Boolean);
+  paragraphs.forEach((p) => {
+    children.push(new Paragraph({ text: p.trim(), spacing: { after: 200 } }));
+  });
 
   const doc = new Document({ sections: [{ children }] });
   return Packer.toBuffer(doc);

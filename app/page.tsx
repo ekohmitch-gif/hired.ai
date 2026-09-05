@@ -10,6 +10,8 @@ interface ExperienceItem {
   bullets: string[];
 }
 
+type ResumeTemplate = 'classic' | 'modern' | 'minimal';
+
 export default function Home() {
   const { user, isSignedIn } = useUser();
   const { openSignIn } = useClerk();
@@ -28,6 +30,8 @@ export default function Home() {
   const [targetRole, setTargetRole] = useState<string>('');
   const [refiningSummary, setRefiningSummary] = useState(false);
   const [exportingFormat, setExportingFormat] = useState<'pdf' | 'docx' | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<ResumeTemplate>('classic');
+
   const [buildForm, setBuildForm] = useState({
     fullName: '',
     email: '',
@@ -61,6 +65,10 @@ export default function Home() {
   const [newApp, setNewApp] = useState({ company: '', jobLink: '', resumeId: '' });
   const [addingApp, setAddingApp] = useState(false);
 
+  const [coverLetter, setCoverLetter] = useState<string>('');
+  const [generatingCoverLetter, setGeneratingCoverLetter] = useState(false);
+  const [exportingCoverLetter, setExportingCoverLetter] = useState<'pdf' | 'docx' | null>(null);
+
   // Sync credit badge from the server (applies weekly reset if due)
   useEffect(() => {
     if (!isSignedIn) return;
@@ -76,6 +84,255 @@ export default function Home() {
       }
     })();
   }, [isSignedIn]);
+
+  const handleStripeCheckout = async () => {
+    if (!isSignedIn) return openSignIn();
+    setCheckoutLoading(true);
+    try {
+      const res = await fetch('/api/checkout', { method: 'POST' });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    } catch {
+      alert('Error connecting to Checkout');
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setParsing(true);
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const res = await fetch('/api/parse', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.text) setResumeText(data.text || '');
+    } catch {
+      alert('Error parsing document');
+    } finally {
+      setParsing(false);
+      setFileKey(Date.now());
+    }
+  };
+
+  // Generation is free and open to everyone — no sign-in required
+  const handleGenerateMatch = async () => {
+    if (!resumeText || !jobDescription) return alert('Provide resume and job description.');
+    setLoading(true);
+    try {
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resumeText, jobDescription }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        alert(data.error || 'Something went wrong');
+        return;
+      }
+      setResult(data);
+      setCoverLetter('');
+    } catch {
+      alert('Something went wrong');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRefineSummary = async () => {
+    const textToRefine = result?.summary || buildForm.summary;
+    if (!textToRefine) return alert('Enter a summary draft first.');
+    setRefiningSummary(true);
+    try {
+      const res = await fetch('/api/generate-section', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          section: 'Professional Summary',
+          prompt: `Refine and optimize this summary for ATS compatibility: "${textToRefine}"`,
+          targetRole,
+        }),
+      });
+      const data = await res.json();
+      if (data.output) {
+        const refined = data.output.trim();
+        setBuildForm((prev) => ({ ...prev, summary: refined }));
+        if (result) setResult((prev: any) => ({ ...prev, summary: refined }));
+      }
+    } catch {
+      alert('Failed to refine summary.');
+    } finally {
+      setRefiningSummary(false);
+    }
+  };
+
+  const handleAddExperience = () => {
+    setBuildForm({
+      ...buildForm,
+      experience: [
+        ...buildForm.experience,
+        { role: '', company: '', dates: '', bullets: [''] },
+      ],
+    });
+  };
+
+  const handleExperienceChange = (index: number, field: string, value: any) => {
+    const updated = [...buildForm.experience];
+    updated[index] = { ...updated[index], [field]: value || '' };
+    setBuildForm({ ...buildForm, experience: updated });
+  };
+
+  const handleAddBullet = (expIndex: number) => {
+    const updated = [...buildForm.experience];
+    updated[expIndex].bullets.push('');
+    setBuildForm({ ...buildForm, experience: updated });
+  };
+
+  const handleBulletChange = (expIndex: number, bulletIndex: number, value: string) => {
+    const updated = [...buildForm.experience];
+    updated[expIndex].bullets[bulletIndex] = value || '';
+    setBuildForm({ ...buildForm, experience: updated });
+  };
+
+  // Building the preview is free too — no gating
+  const handleCompileBuild = () => {
+    const skillsArray = buildForm.skills ? buildForm.skills.split(',').map((s) => s.trim()) : [];
+    const contactParts = [buildForm.location, buildForm.email, buildForm.phone, buildForm.linkedin].filter(Boolean);
+    setResult({
+      fullName: buildForm.fullName || 'Candidate Name',
+      contactInfo: contactParts.join(' | ') || 'Location | Email | Phone',
+      summary: buildForm.summary || 'Professional summary...',
+      skills: skillsArray,
+      experience: buildForm.experience,
+    });
+    setCoverLetter('');
+  };
+
+  // Download is the paywall moment: requires sign-in, then spends a weekly credit
+  const handleExport = async (format: 'pdf' | 'docx') => {
+    if (!result) return;
+
+    if (!isSignedIn) {
+      openSignIn();
+      return;
+    }
+
+    setExportingFormat(format);
+    try {
+      const res = await fetch('/api/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ result, format, template: selectedTemplate }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || 'Export failed');
+        return;
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${(result.fullName || 'resume').replace(/\s+/g, '_')}.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+      if (!isSubscribed) {
+        setRezPoints((prev) => Math.max(0, prev - 1));
+      }
+    } catch {
+      alert('Export failed');
+    } finally {
+      setExportingFormat(null);
+    }
+  };
+
+  const handleSelectTemplate = (t: ResumeTemplate) => {
+    if (t !== 'classic' && !isSubscribed) {
+      alert('This template is a premium feature. Upgrade to unlock all 3 templates.');
+      return;
+    }
+    setSelectedTemplate(t);
+  };
+
+  const fetchSavedResumes = async () => {
+    if (!isSignedIn) return;
+    setLoadingSaved(true);
+    try {
+      const res = await fetch('/api/resumes');
+      const data = await res.json();
+      if (res.ok) setSavedResumes(data.resumes || []);
+    } catch {
+      // silent
+    } finally {
+      setLoadingSaved(false);
+    }
+  };
+
+  const handleToggleSavedPanel = () => {
+    if (!isSignedIn) {
+      openSignIn();
+      return;
+    }
+    const next = !showSavedPanel;
+    setShowSavedPanel(next);
+    if (next) fetchSavedResumes();
+  };
+
+  const handleSaveResume = async () => {
+    if (!result) return;
+    if (!isSignedIn) {
+      openSignIn();
+      return;
+    }
+    const title = window.prompt(
+      'Name this resume (e.g. "Main Resume" or "SWE – Google"):',
+      result.targetRoleTitle || result.fullName || 'My Resume'
+    );
+    if (!title) return;
+
+    setSaving(true);
+    try {
+      const res = await fetch('/api/resumes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, data: result }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || 'Failed to save resume');
+        return;
+      }
+      setSavedResumes((prev) => [data.resume, ...prev]);
+      alert('Resume saved!');
+    } catch {
+      alert('Failed to save resume');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleLoadSavedResume = (resume: any) => {
+    setResult(resume.data);
+    setCoverLetter('');
+    setShowSavedPanel(false);
+  };
+
+  const handleDeleteSavedResume = async (id: string) => {
+    if (!window.confirm('Delete this saved resume? This cannot be undone.')) return;
+    try {
+      const res = await fetch(`/api/resumes?id=${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setSavedResumes((prev) => prev.filter((r) => r.id !== id));
+      }
+    } catch {
+      alert('Failed to delete resume');
+    }
+  };
 
   const fetchApplications = async () => {
     setLoadingApplications(true);
@@ -165,218 +422,54 @@ export default function Home() {
     }
   };
 
-  const fetchSavedResumes = async () => {
-    if (!isSignedIn) return;
-    setLoadingSaved(true);
+  // Cover letter generation — free, same as resume generation
+  const handleGenerateCoverLetter = async () => {
+    if (!resumeText || !jobDescription) {
+      return alert('Generate a resume match first (Step 1 + 2 in New Scan) so there is resume/job context to write from.');
+    }
+    setGeneratingCoverLetter(true);
     try {
-      const res = await fetch('/api/resumes');
-      const data = await res.json();
-      if (res.ok) setSavedResumes(data.resumes || []);
-    } catch {
-      // silent
-    } finally {
-      setLoadingSaved(false);
-    }
-  };
-
-  const handleToggleSavedPanel = () => {
-    if (!isSignedIn) {
-      openSignIn();
-      return;
-    }
-    const next = !showSavedPanel;
-    setShowSavedPanel(next);
-    if (next) fetchSavedResumes();
-  };
-
-  const handleSaveResume = async () => {
-    if (!result) return;
-    if (!isSignedIn) {
-      openSignIn();
-      return;
-    }
-    const title = window.prompt(
-      'Name this resume (e.g. "Main Resume" or "SWE – Google"):',
-      result.targetRoleTitle || result.fullName || 'My Resume'
-    );
-    if (!title) return;
-
-    setSaving(true);
-    try {
-      const res = await fetch('/api/resumes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, data: result }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        alert(data.error || 'Failed to save resume');
-        return;
-      }
-      setSavedResumes((prev) => [data.resume, ...prev]);
-      alert('Resume saved!');
-    } catch {
-      alert('Failed to save resume');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleLoadSavedResume = (resume: any) => {
-    setResult(resume.data);
-    setShowSavedPanel(false);
-  };
-
-  const handleDeleteSavedResume = async (id: string) => {
-    if (!window.confirm('Delete this saved resume? This cannot be undone.')) return;
-    try {
-      const res = await fetch(`/api/resumes?id=${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        setSavedResumes((prev) => prev.filter((r) => r.id !== id));
-      }
-    } catch {
-      alert('Failed to delete resume');
-    }
-  };
-
-  const handleStripeCheckout = async () => {
-    if (!isSignedIn) return openSignIn();
-    setCheckoutLoading(true);
-    try {
-      const res = await fetch('/api/checkout', { method: 'POST' });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-    } catch {
-      alert('Error connecting to Checkout');
-    } finally {
-      setCheckoutLoading(false);
-    }
-  };
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setParsing(true);
-    const formData = new FormData();
-    formData.append('file', file);
-    try {
-      const res = await fetch('/api/parse', { method: 'POST', body: formData });
-      const data = await res.json();
-      if (data.text) setResumeText(data.text || '');
-    } catch {
-      alert('Error parsing document');
-    } finally {
-      setParsing(false);
-      setFileKey(Date.now());
-    }
-  };
-
-  // Generation is free and open to everyone — no sign-in required
-  const handleGenerateMatch = async () => {
-    if (!resumeText || !jobDescription) return alert('Provide resume and job description.');
-    setLoading(true);
-    try {
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ resumeText, jobDescription }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        alert(data.error || 'Something went wrong');
-        return;
-      }
-      setResult(data);
-    } catch {
-      alert('Something went wrong');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleRefineSummary = async () => {
-    const textToRefine = result?.summary || buildForm.summary;
-    if (!textToRefine) return alert('Enter a summary draft first.');
-    setRefiningSummary(true);
-    try {
-      const res = await fetch('/api/generate-section', {
+      const res = await fetch('/api/generate-cover-letter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          section: 'Professional Summary',
-          prompt: `Refine and optimize this summary for ATS compatibility: "${textToRefine}"`,
-          targetRole,
+          resumeText,
+          jobDescription,
+          targetRole: result?.targetRoleTitle || targetRole,
+          fullName: result?.fullName || buildForm.fullName,
         }),
       });
       const data = await res.json();
-      if (data.output) {
-        const refined = data.output.trim();
-        setBuildForm((prev) => ({ ...prev, summary: refined }));
-        if (result) setResult((prev: any) => ({ ...prev, summary: refined }));
+      if (!res.ok) {
+        alert(data.error || 'Failed to generate cover letter');
+        return;
       }
+      setCoverLetter(data.coverLetter || '');
     } catch {
-      alert('Failed to refine summary.');
+      alert('Failed to generate cover letter');
     } finally {
-      setRefiningSummary(false);
+      setGeneratingCoverLetter(false);
     }
   };
 
-  const handleAddExperience = () => {
-    setBuildForm({
-      ...buildForm,
-      experience: [
-        ...buildForm.experience,
-        { role: '', company: '', dates: '', bullets: [''] },
-      ],
-    });
-  };
-
-  const handleExperienceChange = (index: number, field: string, value: any) => {
-    const updated = [...buildForm.experience];
-    updated[index] = { ...updated[index], [field]: value || '' };
-    setBuildForm({ ...buildForm, experience: updated });
-  };
-
-  const handleAddBullet = (expIndex: number) => {
-    const updated = [...buildForm.experience];
-    updated[expIndex].bullets.push('');
-    setBuildForm({ ...buildForm, experience: updated });
-  };
-
-  const handleBulletChange = (expIndex: number, bulletIndex: number, value: string) => {
-    const updated = [...buildForm.experience];
-    updated[expIndex].bullets[bulletIndex] = value || '';
-    setBuildForm({ ...buildForm, experience: updated });
-  };
-
-  // Building the preview is free too — no gating
-  const handleCompileBuild = () => {
-    const skillsArray = buildForm.skills ? buildForm.skills.split(',').map((s) => s.trim()) : [];
-    const contactParts = [buildForm.location, buildForm.email, buildForm.phone, buildForm.linkedin].filter(Boolean);
-    setResult({
-      fullName: buildForm.fullName || 'Candidate Name',
-      contactInfo: contactParts.join(' | ') || 'Location | Email | Phone',
-      summary: buildForm.summary || 'Professional summary...',
-      skills: skillsArray,
-      experience: buildForm.experience,
-    });
-  };
-
-  // Download is the paywall moment: requires sign-in, then spends a weekly credit
-  const handleExport = async (format: 'pdf' | 'docx') => {
-    if (!result) return;
-
+  const handleExportCoverLetter = async (format: 'pdf' | 'docx') => {
+    if (!coverLetter) return;
     if (!isSignedIn) {
       openSignIn();
       return;
     }
-
-    setExportingFormat(format);
+    setExportingCoverLetter(format);
     try {
       const res = await fetch('/api/export', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ result, format }),
+        body: JSON.stringify({
+          docType: 'coverLetter',
+          format,
+          fullName: result?.fullName || buildForm.fullName,
+          contactInfo: result?.contactInfo,
+          coverLetterBody: coverLetter,
+        }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -387,20 +480,19 @@ export default function Home() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${(result.fullName || 'resume').replace(/\s+/g, '_')}.${format}`;
+      a.download = `${(result?.fullName || 'cover_letter').replace(/\s+/g, '_')}_cover_letter.${format}`;
       document.body.appendChild(a);
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
 
-      // Reflect the spend locally right away; server is the real source of truth
       if (!isSubscribed) {
         setRezPoints((prev) => Math.max(0, prev - 1));
       }
     } catch {
       alert('Export failed');
     } finally {
-      setExportingFormat(null);
+      setExportingCoverLetter(null);
     }
   };
 
@@ -527,6 +619,50 @@ export default function Home() {
                 >
                   {loading ? 'Analyzing...' : 'Scan Resume — Free'}
                 </button>
+
+                {/* Cover Letter Generator */}
+                <div className="space-y-2 border border-slate-800 p-3.5 rounded-xl bg-slate-950/50">
+                  <div className="flex justify-between items-center">
+                    <label className="text-xs uppercase text-slate-300 font-semibold">Cover Letter</label>
+                    <button
+                      onClick={handleGenerateCoverLetter}
+                      disabled={generatingCoverLetter}
+                      className="text-[10px] text-amber-400 hover:underline disabled:opacity-60"
+                    >
+                      {generatingCoverLetter ? 'Writing...' : coverLetter ? '↻ Regenerate' : '✨ Generate'}
+                    </button>
+                  </div>
+                  {coverLetter ? (
+                    <>
+                      <textarea
+                        rows={8}
+                        className="w-full p-2 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-300 resize-none outline-none focus:border-amber-400/50"
+                        value={coverLetter}
+                        onChange={(e) => setCoverLetter(e.target.value)}
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleExportCoverLetter('pdf')}
+                          disabled={exportingCoverLetter !== null}
+                          className="flex-1 bg-amber-400 text-slate-950 text-xs font-semibold py-1.5 rounded hover:bg-amber-300 transition disabled:opacity-60"
+                        >
+                          {exportingCoverLetter === 'pdf' ? 'Preparing...' : isSignedIn ? 'Download PDF' : 'Sign in to Download'}
+                        </button>
+                        <button
+                          onClick={() => handleExportCoverLetter('docx')}
+                          disabled={exportingCoverLetter !== null}
+                          className="flex-1 bg-slate-800 text-slate-200 text-xs font-semibold py-1.5 rounded hover:bg-slate-700 transition border border-slate-700 disabled:opacity-60"
+                        >
+                          {exportingCoverLetter === 'docx' ? 'Preparing...' : isSignedIn ? 'Download DOCX' : 'Sign in to Download'}
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-[11px] text-slate-500 italic">
+                      Generate a resume match above first, then create a tailored cover letter here.
+                    </p>
+                  )}
+                </div>
               </div>
             ) : (
               <div className="space-y-3">
@@ -697,6 +833,29 @@ export default function Home() {
               )}
             </div>
 
+            {/* Template Selector */}
+            {result && (
+              <div className="flex items-center gap-2 mb-4 print:hidden">
+                <span className="text-[11px] text-slate-500 uppercase">Template:</span>
+                {(['classic', 'modern', 'minimal'] as ResumeTemplate[]).map((t) => {
+                  const locked = t !== 'classic' && !isSubscribed;
+                  return (
+                    <button
+                      key={t}
+                      onClick={() => handleSelectTemplate(t)}
+                      className={`text-[11px] px-2.5 py-1 rounded-full border transition capitalize ${
+                        selectedTemplate === t
+                          ? 'bg-amber-400 text-slate-950 border-amber-400 font-semibold'
+                          : 'border-slate-700 text-slate-400 hover:text-slate-200'
+                      }`}
+                    >
+                      {t} {locked && '🔒'}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
             {!result ? (
               <div className="h-40 flex items-center justify-center text-slate-500 text-xs italic">
                 Ready to generate document...
@@ -785,7 +944,7 @@ export default function Home() {
                   </div>
                 )}
 
-                {/* Resume Output Panel */}
+                {/* Resume Output Panel — no boxes, plain text separated by bullets */}
                 <div ref={resumeRef} className="space-y-4 text-xs text-slate-200 print:text-black">
                   <div className="border-b border-slate-800 print:border-black pb-2">
                     <h1 className="text-xl font-bold text-white print:text-black">{result.fullName}</h1>
@@ -816,13 +975,9 @@ export default function Home() {
                   {result.skills?.length > 0 && (
                     <div className="space-y-1">
                       <h4 className="font-bold text-amber-300 print:text-black uppercase text-xs">Core Competencies</h4>
-                      <div className="flex flex-wrap gap-1">
-                        {result.skills.map((s: string, i: number) => (
-                          <span key={i} className="bg-slate-950 print:bg-transparent text-slate-300 print:text-black border border-slate-800 px-2 py-0.5 rounded text-[11px] font-mono">
-                            {s}
-                          </span>
-                        ))}
-                      </div>
+                      <p className="text-slate-300 print:text-black text-[11px] font-mono leading-relaxed">
+                        {result.skills.join('   •   ')}
+                      </p>
                     </div>
                   )}
 
