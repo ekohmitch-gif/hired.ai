@@ -13,6 +13,52 @@ interface ExperienceItem {
 
 type ResumeTemplate = 'classic' | 'modern' | 'minimal';
 
+// Live Preview themes mirroring lib/ResumePdfDocument's PDF styles, so
+// the preview shows the selected template's look (serif vs sans, accent
+// color, alignment, skill chips) instead of one fixed style — paid
+// templates were previously bought blind (review L4). Colors are the
+// dark-panel equivalents of the PDF hex values.
+const previewThemes: Record<
+  ResumeTemplate,
+  {
+    font: string;
+    name: string;
+    contact: string;
+    headerRule: string;
+    sectionTitle: string;
+    skillsAlign: string;
+    skillChips: boolean;
+  }
+> = {
+  classic: {
+    font: 'font-serif',
+    name: 'text-xl font-bold text-white text-center',
+    contact: 'text-xs font-mono text-slate-400 text-center',
+    headerRule: 'border-b border-amber-500/40',
+    sectionTitle: 'font-bold text-amber-300 uppercase text-xs',
+    skillsAlign: 'text-center',
+    skillChips: false,
+  },
+  modern: {
+    font: 'font-sans',
+    name: 'text-2xl font-extrabold text-white tracking-tight text-left',
+    contact: 'text-xs font-mono text-amber-400 text-left',
+    headerRule: 'border-b border-slate-700',
+    sectionTitle: 'font-bold text-white uppercase text-xs border-b-2 border-amber-400/70 pb-1',
+    skillsAlign: 'text-left',
+    skillChips: true,
+  },
+  minimal: {
+    font: 'font-sans font-light',
+    name: 'text-xl font-normal text-slate-100 text-left',
+    contact: 'text-xs font-mono text-slate-500 text-left',
+    headerRule: 'border-b border-slate-800',
+    sectionTitle: 'font-semibold text-slate-400 uppercase text-[11px] tracking-[0.25em]',
+    skillsAlign: 'text-left',
+    skillChips: false,
+  },
+};
+
 export default function Home() {
   const { user, isSignedIn } = useUser();
   const { openSignIn } = useClerk();
@@ -530,6 +576,8 @@ export default function Home() {
     }
   };
 
+  const pt = previewThemes[selectedTemplate];
+
   return (
     <main className="min-h-screen bg-[#0B0F17] text-slate-100 font-sans p-6">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -1014,15 +1062,15 @@ export default function Home() {
                 )}
 
                 {/* Resume Output Panel — no boxes, plain text separated by bullets */}
-                <div ref={resumeRef} className="space-y-4 text-xs text-slate-200">
-                  <div className="border-b border-slate-800 pb-2">
-                    <h1 className="text-xl font-bold text-white">{result.fullName}</h1>
-                    <p className="text-xs font-mono text-slate-400">{result.contactInfo}</p>
+                <div ref={resumeRef} className={`space-y-4 text-xs text-slate-200 ${pt.font}`}>
+                  <div className={`${pt.headerRule} pb-2`}>
+                    <h1 className={pt.name}>{result.fullName}</h1>
+                    <p className={pt.contact}>{result.contactInfo}</p>
                   </div>
 
                   <div className="space-y-1">
                     <div className="flex justify-between items-center">
-                      <h4 className="font-bold text-amber-300 uppercase text-xs">Professional Summary</h4>
+                      <h4 className={pt.sectionTitle}>Professional Summary</h4>
                       <button onClick={handleRefineSummary} disabled={refiningSummary} className="text-[10px] text-amber-400">
                         {refiningSummary ? 'Refining...' : '✨ Refine text'}
                       </button>
@@ -1043,16 +1091,26 @@ export default function Home() {
 
                   {result.skills?.length > 0 && (
                     <div className="space-y-1">
-                      <h4 className="font-bold text-amber-300 uppercase text-xs">Core Competencies</h4>
-                      <p className="text-slate-300 text-[11px] font-mono leading-relaxed">
-                        {result.skills.join('   •   ')}
-                      </p>
+                      <h4 className={pt.sectionTitle}>Core Competencies</h4>
+                      {pt.skillChips ? (
+                        <div className="flex flex-wrap gap-1.5">
+                          {result.skills.map((skill: string, sIdx: number) => (
+                            <span key={sIdx} className="text-[11px] text-slate-200 border border-slate-600 rounded px-1.5 py-0.5">
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className={`text-slate-300 text-[11px] font-mono leading-relaxed ${pt.skillsAlign}`}>
+                          {result.skills.join('   •   ')}
+                        </p>
+                      )}
                     </div>
                   )}
 
                   {result.experience?.length > 0 && (
                     <div className="space-y-3">
-                      <h4 className="font-bold text-amber-300 uppercase text-xs">Professional Experience</h4>
+                      <h4 className={pt.sectionTitle}>Professional Experience</h4>
                       {result.experience.map((exp: any, expIdx: number) => (
                         <div key={expIdx} className="space-y-1">
                           <div className="flex justify-between items-baseline font-bold text-slate-100">
@@ -1073,7 +1131,7 @@ export default function Home() {
 
                   {result.projects?.length > 0 && (
                     <div className="space-y-2">
-                      <h4 className="font-bold text-amber-300 uppercase text-xs">Projects</h4>
+                      <h4 className={pt.sectionTitle}>Projects</h4>
                       {result.projects.map((proj: any, pIdx: number) => (
                         <div key={pIdx} className="space-y-0.5">
                           <p className="font-bold text-slate-100">
@@ -1089,7 +1147,7 @@ export default function Home() {
 
                   {result.education?.length > 0 && (
                     <div className="space-y-1">
-                      <h4 className="font-bold text-amber-300 uppercase text-xs">Education</h4>
+                      <h4 className={pt.sectionTitle}>Education</h4>
                       {result.education.map((edu: any, eIdx: number) => (
                         <div key={eIdx} className="flex justify-between items-baseline text-slate-200">
                           <span className="font-bold">{edu.degree} — {edu.institution}</span>
