@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { isRateLimited } from '@/lib/rate-limit';
+import { reconcileGeneratedSkills } from '@/lib/skills';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -121,6 +122,14 @@ You MUST return your response ONLY in valid JSON matching this exact structure:
     });
 
     const result = JSON.parse(completion.choices[0].message.content || '{}');
+
+    // The model's matched/missing skill lists are not trustworthy —
+    // it has listed the same skill as both, and skills present in
+    // neither document as matched. Correct them deterministically
+    // against the actual resume and job-description text. The
+    // model's match score is kept as-is.
+    reconcileGeneratedSkills(result, resumeText, jobDescription);
+
     return NextResponse.json(result);
   } catch (error: any) {
     console.error('Error generating resume:', error);
