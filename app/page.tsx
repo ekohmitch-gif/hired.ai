@@ -536,9 +536,9 @@ export default function Home() {
 
         {/* Top Header Navigation */}
         <header className="flex justify-between items-center border-b border-slate-800 pb-4">
-          <h1 className="text-2xl font-bold font-serif text-white">
+          <div className="text-2xl font-bold font-serif text-white">
             Enhancerez<span className="text-amber-400">.com</span>
-          </h1>
+          </div>
           <div className="flex items-center gap-3">
             {isSignedIn && (
               isSubscribed ? (
@@ -611,9 +611,12 @@ export default function Home() {
 
         {/* Welcome Section */}
         <div className="space-y-1">
-          <h2 className="text-3xl font-bold text-white tracking-tight">
+          <h1 className="text-3xl font-bold text-white tracking-tight">
+            Tailor Your Resume &amp; Get Hired Faster
+          </h1>
+          <p className="text-xl font-semibold text-white">
             Welcome, {isSignedIn && user?.firstName ? user.firstName : 'there'}!
-          </h2>
+          </p>
           <p className="text-xs text-slate-400">
             Drop in your resume and a job description to get your Match Rate in about 30 seconds. Free to build and preview — sign in when you're ready to download.
           </p>
