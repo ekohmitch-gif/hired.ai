@@ -59,6 +59,17 @@ const previewThemes: Record<
   },
 };
 
+// Contact lines are assembled with " | " separators — normalize any
+// contact string (model output included) by trimming each part and
+// dropping empties, so no dangling separators survive into the
+// preview or exports.
+const cleanContactInfo = (value: string): string =>
+  (value || '')
+    .split('|')
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .join(' | ');
+
 export default function Home() {
   const { user, isSignedIn } = useUser();
   const { openSignIn } = useClerk();
@@ -212,7 +223,7 @@ export default function Home() {
         alert(data.error || 'Something went wrong');
         return;
       }
-      setResult(data);
+      setResult({ ...data, contactInfo: cleanContactInfo(data.contactInfo || '') });
       setCoverLetter('');
     } catch {
       alert('Something went wrong');
@@ -279,7 +290,9 @@ export default function Home() {
   // Building the preview is free too — no gating
   const handleCompileBuild = () => {
     const skillsArray = buildForm.skills ? buildForm.skills.split(',').map((s) => s.trim()) : [];
-    const contactParts = [buildForm.location, buildForm.email, buildForm.phone, buildForm.linkedin].filter(Boolean);
+    const contactParts = [buildForm.location, buildForm.email, buildForm.phone, buildForm.linkedin]
+      .map((v) => (v || '').trim())
+      .filter(Boolean);
     setResult({
       fullName: buildForm.fullName || 'Candidate Name',
       contactInfo: contactParts.join(' | ') || 'Location | Email | Phone',
@@ -397,7 +410,7 @@ export default function Home() {
   };
 
   const handleLoadSavedResume = (resume: any) => {
-    setResult(resume.data);
+    setResult({ ...resume.data, contactInfo: cleanContactInfo(resume.data?.contactInfo || '') });
     setCoverLetter('');
     setShowSavedPanel(false);
   };
