@@ -531,11 +531,11 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-[#0B0F17] text-slate-100 font-sans p-6 print:bg-white print:text-black print:p-0">
+    <main className="min-h-screen bg-[#0B0F17] text-slate-100 font-sans p-6">
       <div className="max-w-7xl mx-auto space-y-6">
 
         {/* Top Header Navigation */}
-        <header className="flex justify-between items-center border-b border-slate-800 pb-4 print:hidden">
+        <header className="flex justify-between items-center border-b border-slate-800 pb-4">
           <h1 className="text-2xl font-bold font-serif text-white">
             Enhancerez<span className="text-amber-400">.com</span>
           </h1>
@@ -582,7 +582,7 @@ export default function Home() {
         {/* Checkout return notice */}
         {checkoutNotice && (
           <div
-            className={`flex items-start justify-between gap-3 rounded-xl border px-4 py-3 text-xs print:hidden ${
+            className={`flex items-start justify-between gap-3 rounded-xl border px-4 py-3 text-xs ${
               checkoutNotice === 'success'
                 ? 'border-emerald-800/60 bg-emerald-950/40 text-emerald-200'
                 : 'border-slate-700 bg-slate-900 text-slate-300'
@@ -610,7 +610,7 @@ export default function Home() {
         )}
 
         {/* Welcome Section */}
-        <div className="space-y-1 print:hidden">
+        <div className="space-y-1">
           <h2 className="text-3xl font-bold text-white tracking-tight">
             Welcome, {isSignedIn && user?.firstName ? user.firstName : 'there'}!
           </h2>
@@ -620,7 +620,7 @@ export default function Home() {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex gap-2 border-b border-slate-800 pb-3 print:hidden">
+        <div className="flex gap-2 border-b border-slate-800 pb-3">
           <button
             onClick={() => setActiveTab('match')}
             className={`text-xs uppercase px-3.5 py-1.5 rounded-lg transition font-medium ${
@@ -639,8 +639,8 @@ export default function Home() {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 print:block">
-          <div className="lg:col-span-5 space-y-4 bg-slate-900/40 p-5 rounded-xl border border-slate-800 print:hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-5 space-y-4 bg-slate-900/40 p-5 rounded-xl border border-slate-800">
             {activeTab === 'match' ? (
               <div className="space-y-4">
                 {/* Step 1: Resume Upload */}
@@ -869,8 +869,8 @@ export default function Home() {
           </div>
 
           {/* Right Live Preview Panel */}
-          <div className="lg:col-span-7 bg-slate-900/40 p-6 rounded-xl border border-slate-800 print:bg-white print:border-none print:p-0">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4 print:hidden">
+          <div className="lg:col-span-7 bg-slate-900/40 p-6 rounded-xl border border-slate-800">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
               <span className="text-xs uppercase text-slate-400">Live Preview</span>
               {result && (
                 <div className="flex gap-2">
@@ -901,7 +901,7 @@ export default function Home() {
 
             {/* Template Selector */}
             {result && (
-              <div className="flex items-center gap-2 mb-4 print:hidden">
+              <div className="flex items-center gap-2 mb-4">
                 <span className="text-[11px] text-slate-500 uppercase">Template:</span>
                 {(['classic', 'modern', 'minimal'] as ResumeTemplate[]).map((t) => {
                   const locked = t !== 'classic' && !isSubscribed;
@@ -930,7 +930,7 @@ export default function Home() {
               <div className="space-y-6">
                 {/* ATS Optimization Match Box */}
                 {(result.matchScore !== undefined || result.hardSkills || result.softSkills) && (
-                  <div className="p-4 bg-slate-950 border border-slate-800 rounded-xl space-y-4 print:hidden">
+                  <div className="p-4 bg-slate-950 border border-slate-800 rounded-xl space-y-4">
                     <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                       <div>
                         <h3 className="text-sm font-semibold text-white">ATS Optimization Match</h3>
@@ -1011,16 +1011,16 @@ export default function Home() {
                 )}
 
                 {/* Resume Output Panel — no boxes, plain text separated by bullets */}
-                <div ref={resumeRef} className="space-y-4 text-xs text-slate-200 print:text-black">
-                  <div className="border-b border-slate-800 print:border-black pb-2">
-                    <h1 className="text-xl font-bold text-white print:text-black">{result.fullName}</h1>
-                    <p className="text-xs font-mono text-slate-400 print:text-slate-800">{result.contactInfo}</p>
+                <div ref={resumeRef} className="space-y-4 text-xs text-slate-200">
+                  <div className="border-b border-slate-800 pb-2">
+                    <h1 className="text-xl font-bold text-white">{result.fullName}</h1>
+                    <p className="text-xs font-mono text-slate-400">{result.contactInfo}</p>
                   </div>
 
                   <div className="space-y-1">
-                    <div className="flex justify-between items-center print:block">
-                      <h4 className="font-bold text-amber-300 print:text-black uppercase text-xs">Professional Summary</h4>
-                      <button onClick={handleRefineSummary} disabled={refiningSummary} className="text-[10px] text-amber-400 print:hidden">
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-bold text-amber-300 uppercase text-xs">Professional Summary</h4>
+                      <button onClick={handleRefineSummary} disabled={refiningSummary} className="text-[10px] text-amber-400">
                         {refiningSummary ? 'Refining...' : '✨ Refine text'}
                       </button>
                     </div>
@@ -1032,7 +1032,7 @@ export default function Home() {
                         setResult((prev: any) => ({ ...prev, summary: updated }));
                         setBuildForm((prev) => ({ ...prev, summary: updated }));
                       }}
-                      className="w-full bg-slate-950/40 print:bg-transparent p-2 rounded border border-slate-800 print:border-none text-xs leading-relaxed text-slate-300 print:text-black outline-none"
+                      className="w-full bg-slate-950/40 p-2 rounded border border-slate-800 text-xs leading-relaxed text-slate-300 outline-none"
                     >
                       {result.summary}
                     </div>
@@ -1040,8 +1040,8 @@ export default function Home() {
 
                   {result.skills?.length > 0 && (
                     <div className="space-y-1">
-                      <h4 className="font-bold text-amber-300 print:text-black uppercase text-xs">Core Competencies</h4>
-                      <p className="text-slate-300 print:text-black text-[11px] font-mono leading-relaxed">
+                      <h4 className="font-bold text-amber-300 uppercase text-xs">Core Competencies</h4>
+                      <p className="text-slate-300 text-[11px] font-mono leading-relaxed">
                         {result.skills.join('   •   ')}
                       </p>
                     </div>
@@ -1049,14 +1049,14 @@ export default function Home() {
 
                   {result.experience?.length > 0 && (
                     <div className="space-y-3">
-                      <h4 className="font-bold text-amber-300 print:text-black uppercase text-xs">Professional Experience</h4>
+                      <h4 className="font-bold text-amber-300 uppercase text-xs">Professional Experience</h4>
                       {result.experience.map((exp: any, expIdx: number) => (
                         <div key={expIdx} className="space-y-1">
-                          <div className="flex justify-between items-baseline font-bold text-slate-100 print:text-black">
+                          <div className="flex justify-between items-baseline font-bold text-slate-100">
                             <span>{exp.role} {exp.company && `— ${exp.company}`}</span>
-                            <span className="font-mono text-[11px] text-slate-400 print:text-slate-700">{exp.dates}</span>
+                            <span className="font-mono text-[11px] text-slate-400">{exp.dates}</span>
                           </div>
-                          <ul className="list-disc list-inside space-y-1 pl-1 text-slate-300 print:text-black">
+                          <ul className="list-disc list-inside space-y-1 pl-1 text-slate-300">
                             {exp.bullets?.map((bullet: string, bIdx: number) => (
                               <li key={bIdx} className="leading-relaxed">
                                 {bullet}
@@ -1070,14 +1070,14 @@ export default function Home() {
 
                   {result.projects?.length > 0 && (
                     <div className="space-y-2">
-                      <h4 className="font-bold text-amber-300 print:text-black uppercase text-xs">Projects</h4>
+                      <h4 className="font-bold text-amber-300 uppercase text-xs">Projects</h4>
                       {result.projects.map((proj: any, pIdx: number) => (
                         <div key={pIdx} className="space-y-0.5">
-                          <p className="font-bold text-slate-100 print:text-black">
+                          <p className="font-bold text-slate-100">
                             {proj.title} {proj.role && `— ${proj.role}`}
                           </p>
                           {proj.description && (
-                            <p className="text-slate-300 print:text-black leading-relaxed">{proj.description}</p>
+                            <p className="text-slate-300 leading-relaxed">{proj.description}</p>
                           )}
                         </div>
                       ))}
@@ -1086,11 +1086,11 @@ export default function Home() {
 
                   {result.education?.length > 0 && (
                     <div className="space-y-1">
-                      <h4 className="font-bold text-amber-300 print:text-black uppercase text-xs">Education</h4>
+                      <h4 className="font-bold text-amber-300 uppercase text-xs">Education</h4>
                       {result.education.map((edu: any, eIdx: number) => (
-                        <div key={eIdx} className="flex justify-between items-baseline text-slate-200 print:text-black">
+                        <div key={eIdx} className="flex justify-between items-baseline text-slate-200">
                           <span className="font-bold">{edu.degree} — {edu.institution}</span>
-                          <span className="font-mono text-[11px] text-slate-400 print:text-slate-700">{edu.dates}</span>
+                          <span className="font-mono text-[11px] text-slate-400">{edu.dates}</span>
                         </div>
                       ))}
                     </div>
@@ -1105,7 +1105,7 @@ export default function Home() {
 
       {/* Job Tracker Overlay Panel — premium only */}
       {showTrackerPanel && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-6 print:hidden">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-6">
           <div className="bg-slate-900 border border-slate-800 rounded-xl w-full max-w-2xl max-h-[80vh] overflow-y-auto p-5 space-y-4">
             <div className="flex justify-between items-center border-b border-slate-800 pb-3">
               <h3 className="text-sm font-bold text-white">Job Application Tracker</h3>
@@ -1238,7 +1238,7 @@ export default function Home() {
 
       {/* Saved Resumes Overlay Panel */}
       {showSavedPanel && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-6 print:hidden">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-6">
           <div className="bg-slate-900 border border-slate-800 rounded-xl w-full max-w-lg max-h-[80vh] overflow-y-auto p-5 space-y-3">
             <div className="flex justify-between items-center border-b border-slate-800 pb-3">
               <h3 className="text-sm font-bold text-white">My Saved Resumes</h3>
@@ -1292,7 +1292,7 @@ export default function Home() {
       )}
 
       {/* Site Footer */}
-      <footer className="max-w-7xl mx-auto mt-10 border-t border-slate-800 pt-5 pb-2 flex flex-col sm:flex-row items-center justify-between gap-3 print:hidden">
+      <footer className="max-w-7xl mx-auto mt-10 border-t border-slate-800 pt-5 pb-2 flex flex-col sm:flex-row items-center justify-between gap-3">
         <p className="text-[11px] text-slate-500">
           Enhancerez<span className="text-amber-400">.com</span> — AI Resume Builder
         </p>
