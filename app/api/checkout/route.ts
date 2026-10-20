@@ -11,6 +11,17 @@ export async function POST() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Server-side guard: never create a second subscription for an
+    // already-Pro user. The client hides the checkout button for
+    // subscribers, but the route cannot trust that — a direct call
+    // would otherwise double-subscribe them (review N4).
+    if (user.publicMetadata?.isPro === true) {
+      return NextResponse.json(
+        { error: "You're already subscribed to Pro — there's no need to check out again." },
+        { status: 409 }
+      );
+    }
+
     const email = user.emailAddresses[0]?.emailAddress;
 
     const session = await stripe.checkout.sessions.create({
