@@ -27,7 +27,7 @@ Analyze the user's uploaded Resume against the target Job Description.
 STRICT INSTRUCTIONS:
 1. Target Job Title: Extract the exact job title from the Job Description and return it in "targetRoleTitle".
 2. Mirror Language: Use exact keywords, technical terms, frameworks, and phrasing from the Job Description across the summary, skills, and experience.
-3. Quantitative Bullets: Every bullet point in the "experience" section MUST include quantifiable metrics, statistics, percentages, or scale (e.g., "100% compliance", "across 5+ environments", "reducing resolution time by 30%").
+3. Metrics — Use Only What Exists: Include a metric in a bullet ONLY when that exact number, percentage, dollar amount, or scale figure appears in the source resume. NEVER invent, estimate, or infer statistics, percentages, or outcomes that are not in the source resume. When the source resume has no metric for a responsibility, write a strong bullet led by a concrete action verb describing the work exactly as given — without adding any numbers.
 4. Comprehensive Extraction: Do NOT omit any past work history, education, or projects found in the original resume. Extract and enhance all of them.
 
 You MUST return your response ONLY in valid JSON matching this exact structure:
@@ -44,8 +44,8 @@ You MUST return your response ONLY in valid JSON matching this exact structure:
       "company": "Company Name | Location",
       "dates": "Start - End",
       "bullets": [
-        "Quantifiable tailored bullet point 1 mirroring job description language",
-        "Quantifiable tailored bullet point 2 with metrics and outcomes"
+        "Tailored bullet point 1 mirroring job description language — include a metric only if that exact figure appears in the source resume",
+        "Tailored bullet point 2 — never invent metrics, percentages, or outcomes"
       ]
     }
   ],
