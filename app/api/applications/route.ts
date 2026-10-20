@@ -36,7 +36,7 @@ export async function GET() {
     return NextResponse.json({ applications: rows });
   } catch (error: any) {
     console.error('Fetch applications error:', error);
-    return NextResponse.json({ error: error?.message || 'Failed to load applications' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong — please try again' }, { status: 500 });
   }
 }
 
@@ -67,7 +67,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ application: rows[0] });
   } catch (error: any) {
     console.error('Create application error:', error);
-    return NextResponse.json({ error: error?.message || 'Failed to create application' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong — please try again' }, { status: 500 });
   }
 }
 
@@ -105,7 +105,7 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ application: rows[0] });
   } catch (error: any) {
     console.error('Update application error:', error);
-    return NextResponse.json({ error: error?.message || 'Failed to update application' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong — please try again' }, { status: 500 });
   }
 }
 
@@ -130,6 +130,6 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('Delete application error:', error);
-    return NextResponse.json({ error: error?.message || 'Failed to delete application' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong — please try again' }, { status: 500 });
   }
 }

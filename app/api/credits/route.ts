@@ -22,6 +22,6 @@ export async function GET() {
     return NextResponse.json(state);
   } catch (error: any) {
     console.error('Credits fetch error:', error);
-    return NextResponse.json({ error: error?.message || 'Failed to load credits' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong — please try again' }, { status: 500 });
   }
 }

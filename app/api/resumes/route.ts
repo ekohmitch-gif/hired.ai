@@ -20,7 +20,7 @@ export async function GET() {
     return NextResponse.json({ resumes: rows });
   } catch (error: any) {
     console.error('Fetch resumes error:', error);
-    return NextResponse.json({ error: error?.message || 'Failed to load resumes' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong — please try again' }, { status: 500 });
   }
 }
 
@@ -46,7 +46,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ resume: rows[0] });
   } catch (error: any) {
     console.error('Save resume error:', error);
-    return NextResponse.json({ error: error?.message || 'Failed to save resume' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong — please try again' }, { status: 500 });
   }
 }
 
@@ -71,6 +71,6 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('Delete resume error:', error);
-    return NextResponse.json({ error: error?.message || 'Failed to delete resume' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong — please try again' }, { status: 500 });
   }
 }
