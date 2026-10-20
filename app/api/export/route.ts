@@ -22,7 +22,11 @@ export function stableStringify(value: any): string {
 
 // Stable content hash of the document being exported (content only —
 // not format or template: re-exporting the same document in another
-// format is the same document for metering).
+// format is the same document for metering). For resumes the hash
+// covers ONLY the fields the PDF/DOCX builders render. Analysis output
+// (matchScore, recruiterChecks, skill-gap lists, targetRoleTitle) is
+// volatile — re-scanning the identical resume can change it — and must
+// not turn a re-download of the same document into a second charge.
 export function exportDocHash(body: any, isCoverLetter: boolean): string {
   const payload = isCoverLetter
     ? {
@@ -31,7 +35,16 @@ export function exportDocHash(body: any, isCoverLetter: boolean): string {
         contactInfo: body.contactInfo || '',
         body: body.coverLetterBody || '',
       }
-    : { doc: 'resume', result: body.result ?? null };
+    : {
+        doc: 'resume',
+        fullName: body.result?.fullName || '',
+        contactInfo: body.result?.contactInfo || '',
+        summary: body.result?.summary || '',
+        skills: body.result?.skills ?? null,
+        experience: body.result?.experience ?? null,
+        education: body.result?.education ?? null,
+        projects: body.result?.projects ?? null,
+      };
   return createHash('sha256').update(stableStringify(payload)).digest('hex').slice(0, 32);
 }
 
@@ -46,13 +59,10 @@ export async function POST(req: Request) {
     const user = await client.users.getUser(userId);
     const { state } = computeCreditState(user);
 
-    if (!state.isPro && state.credits <= 0) {
-      return NextResponse.json(
-        { error: "You've used all your downloads this week. Upgrade for unlimited." },
-        { status: 402 }
-      );
-    }
-
+    // NOTE: no balance gate here. The zero-balance 402 lives in the
+    // charge block below, AFTER the content-hash dedupe — a document
+    // already charged this week must re-download for free even at a
+    // zero balance (review N3).
     const body = await req.json();
     const { format, docType } = body;
     const isCoverLetter = docType === 'coverLetter';
@@ -113,8 +123,10 @@ export async function POST(req: Request) {
           }
           await client.users.updateUserMetadata(userId, {
             publicMetadata: {
+              // Spread preserves the freshly read isPro — never write
+              // isPro here: hardcoding false could stomp a Pro upgrade
+              // that lands mid-export (review N1).
               ...freshUser.publicMetadata,
-              isPro: false,
               credits: freshState.credits - 1,
               creditsResetAt: freshState.creditsResetAt,
               // Bounded: newest 50 charged documents for this week.
@@ -177,8 +189,9 @@ export async function POST(req: Request) {
             : [];
           await client.users.updateUserMetadata(userId, {
             publicMetadata: {
+              // As with the charge write: preserve the freshly read
+              // isPro via the spread, never hardcode it (review N1).
               ...nowUser.publicMetadata,
-              isPro: false,
               credits: nowCredits + 1,
               creditsResetAt: chargedResetAt,
               chargedDocs: chargedNewDoc
