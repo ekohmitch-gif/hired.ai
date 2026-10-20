@@ -1067,6 +1067,34 @@ export default function Home() {
                       ))}
                     </div>
                   )}
+
+                  {result.projects?.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="font-bold text-amber-300 print:text-black uppercase text-xs">Projects</h4>
+                      {result.projects.map((proj: any, pIdx: number) => (
+                        <div key={pIdx} className="space-y-0.5">
+                          <p className="font-bold text-slate-100 print:text-black">
+                            {proj.title} {proj.role && `— ${proj.role}`}
+                          </p>
+                          {proj.description && (
+                            <p className="text-slate-300 print:text-black leading-relaxed">{proj.description}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {result.education?.length > 0 && (
+                    <div className="space-y-1">
+                      <h4 className="font-bold text-amber-300 print:text-black uppercase text-xs">Education</h4>
+                      {result.education.map((edu: any, eIdx: number) => (
+                        <div key={eIdx} className="flex justify-between items-baseline text-slate-200 print:text-black">
+                          <span className="font-bold">{edu.degree} — {edu.institution}</span>
+                          <span className="font-mono text-[11px] text-slate-400 print:text-slate-700">{edu.dates}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
