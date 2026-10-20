@@ -19,7 +19,11 @@ export async function POST(req: Request) {
       process.env.STRIPE_WEBHOOK_SECRET!
     );
   } catch (err: any) {
-    return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
+    console.error('Stripe webhook signature verification failed:', err);
+    return NextResponse.json(
+      { error: 'Webhook signature verification failed' },
+      { status: 400 }
+    );
   }
 
   if (event.type === 'checkout.session.completed') {
@@ -45,10 +49,18 @@ export async function POST(req: Request) {
     const subscription = event.data.object as any;
     const isActive = subscription.status === 'active' || subscription.status === 'trialing';
 
-    const users = await clerkClient.users.getUserList({ limit: 500 });
-    const match = users.data.find(
-      (u) => u.publicMetadata?.stripeSubscriptionId === subscription.id
-    );
+    // Find the subscriber by their stored subscription ID. Page through
+    // ALL Clerk users — stopping at the first 500 meant cancellations
+    // from later subscribers were silently never honored.
+    const PAGE_SIZE = 500;
+    let match: any = undefined;
+    for (let offset = 0; match === undefined; offset += PAGE_SIZE) {
+      const page = await clerkClient.users.getUserList({ limit: PAGE_SIZE, offset });
+      match = page.data.find(
+        (u: any) => u.publicMetadata?.stripeSubscriptionId === subscription.id
+      );
+      if (page.data.length < PAGE_SIZE) break;
+    }
 
     if (match) {
       await clerkClient.users.updateUserMetadata(match.id, {
