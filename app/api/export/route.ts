@@ -1,10 +1,39 @@
 import { NextResponse } from 'next/server';
+import { createHash } from 'node:crypto';
 import { auth, clerkClient } from '@clerk/nextjs/server';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { ResumePdfDocument, ResumeTemplate } from '@/lib/ResumePdfDocument';
 import { CoverLetterPdfDocument } from '@/lib/CoverLetterPdfDocument';
 import { computeCreditState } from '@/lib/credits';
+
+// Upper bound on remembered charged documents per user (Clerk metadata
+// stays small; 50 unique documents a week is far beyond normal use).
+const MAX_CHARGED_DOCS = 50;
+
+// Deterministic JSON with recursively sorted object keys, so the same
+// document hashes identically regardless of key order in the request.
+export function stableStringify(value: any): string {
+  if (value === null || typeof value !== 'object') return JSON.stringify(value) ?? 'null';
+  if (Array.isArray(value)) return `[${value.map(stableStringify).join(',')}]`;
+  const keys = Object.keys(value).sort();
+  return `{${keys.map((k) => `${JSON.stringify(k)}:${stableStringify(value[k])}`).join(',')}}`;
+}
+
+// Stable content hash of the document being exported (content only —
+// not format or template: re-exporting the same document in another
+// format is the same document for metering).
+export function exportDocHash(body: any, isCoverLetter: boolean): string {
+  const payload = isCoverLetter
+    ? {
+        doc: 'cover',
+        fullName: body.fullName || '',
+        contactInfo: body.contactInfo || '',
+        body: body.coverLetterBody || '',
+      }
+    : { doc: 'resume', result: body.result ?? null };
+  return createHash('sha256').update(stableStringify(payload)).digest('hex').slice(0, 32);
+}
 
 export async function POST(req: Request) {
   try {
@@ -42,6 +71,12 @@ export async function POST(req: Request) {
       ? (state.isPro ? body.template : 'classic')
       : 'classic';
 
+    // Metering fairness: one charge per unique DOCUMENT per credit
+    // week — exporting the same resume as PDF and then DOCX (or
+    // re-downloading it) is one document, not two (review M1). The
+    // hash covers the document content only, not the format.
+    const docHash = exportDocHash(body, isCoverLetter);
+
     // Charge the credit BEFORE generating the file, based on a fresh
     // re-read of the user's state (a stale read could over-credit after
     // a weekly reset or a concurrent change). If generation then fails,
@@ -53,26 +88,43 @@ export async function POST(req: Request) {
     // database transaction.
     let chargedBalance: number | null = null; // pre-charge balance, for refunds
     let chargedResetAt: string | null = null;
+    let chargedNewDoc = false; // true when this request added the doc-hash entry
     if (!state.isPro) {
       const freshUser = await client.users.getUser(userId);
       const { state: freshState } = computeCreditState(freshUser);
       if (!freshState.isPro) {
-        if (freshState.credits <= 0) {
-          return NextResponse.json(
-            { error: "You've used all your downloads this week. Upgrade for unlimited." },
-            { status: 402 }
-          );
+        const week = freshState.creditsResetAt;
+        const priorDocs: any[] = Array.isArray(freshUser.publicMetadata?.chargedDocs)
+          ? freshUser.publicMetadata.chargedDocs
+          : [];
+        // Only entries from the current credit week count; older ones
+        // are pruned on the next write.
+        const weekDocs = priorDocs.filter(
+          (e: any) => e && typeof e.h === 'string' && e.w === week
+        );
+        const alreadyCharged = weekDocs.some((e: any) => e.h === docHash);
+
+        if (!alreadyCharged) {
+          if (freshState.credits <= 0) {
+            return NextResponse.json(
+              { error: "You've used all your downloads this week. Upgrade for unlimited." },
+              { status: 402 }
+            );
+          }
+          await client.users.updateUserMetadata(userId, {
+            publicMetadata: {
+              ...freshUser.publicMetadata,
+              isPro: false,
+              credits: freshState.credits - 1,
+              creditsResetAt: freshState.creditsResetAt,
+              // Bounded: newest 50 charged documents for this week.
+              chargedDocs: [...weekDocs, { h: docHash, w: week }].slice(-MAX_CHARGED_DOCS),
+            },
+          });
+          chargedBalance = freshState.credits;
+          chargedResetAt = freshState.creditsResetAt;
+          chargedNewDoc = true;
         }
-        await client.users.updateUserMetadata(userId, {
-          publicMetadata: {
-            ...freshUser.publicMetadata,
-            isPro: false,
-            credits: freshState.credits - 1,
-            creditsResetAt: freshState.creditsResetAt,
-          },
-        });
-        chargedBalance = freshState.credits;
-        chargedResetAt = freshState.creditsResetAt;
       }
     }
 
@@ -111,7 +163,8 @@ export async function POST(req: Request) {
         }
       }
     } catch (genError) {
-      // Generation failed after the charge — put the credit back.
+      // Generation failed after the charge — put the credit back and
+      // un-mark the document, so the user is exactly where they started.
       if (chargedBalance !== null) {
         try {
           const nowUser = await client.users.getUser(userId);
@@ -119,12 +172,18 @@ export async function POST(req: Request) {
             typeof nowUser.publicMetadata?.credits === 'number'
               ? (nowUser.publicMetadata.credits as number)
               : chargedBalance - 1;
+          const nowDocs: any[] = Array.isArray(nowUser.publicMetadata?.chargedDocs)
+            ? nowUser.publicMetadata.chargedDocs
+            : [];
           await client.users.updateUserMetadata(userId, {
             publicMetadata: {
               ...nowUser.publicMetadata,
               isPro: false,
               credits: nowCredits + 1,
               creditsResetAt: chargedResetAt,
+              chargedDocs: chargedNewDoc
+                ? nowDocs.filter((e: any) => !(e && e.h === docHash && e.w === chargedResetAt))
+                : nowDocs,
             },
           });
         } catch (restoreError) {
