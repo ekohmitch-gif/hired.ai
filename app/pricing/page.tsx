@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-// The Pro subscription price is configured in Stripe (STRIPE_PRICE_ID) and
-// is intentionally NOT stored in this codebase — the code only knows the
-// price ID. Set this display string from the live Stripe price.
-const PRO_PRICE_DISPLAY = '[set from Stripe price]';
+// Pro price confirmed by the owner on Oct 19, 2026: $12.00/month. The amount
+// is charged via the Stripe price in STRIPE_PRICE_ID — keep this display
+// string in sync if the Stripe price ever changes.
+const PRO_PRICE_DISPLAY = '$12/month';
 
 export const metadata: Metadata = {
   title: 'Pricing — EnhanceRez | AI Resume Builder',
