@@ -70,29 +70,62 @@ export default function Home() {
   const [generatingCoverLetter, setGeneratingCoverLetter] = useState(false);
   const [exportingCoverLetter, setExportingCoverLetter] = useState<'pdf' | 'docx' | null>(null);
 
-  // Sync credit badge from the server (applies weekly reset if due)
+  const [checkoutNotice, setCheckoutNotice] = useState<'success' | 'canceled' | null>(null);
+
+  // Sync credit badge / Pro state from the server (applies weekly reset if due)
+  const refreshCredits = async () => {
+    try {
+      const res = await fetch('/api/credits');
+      if (!res.ok) return;
+      const data = await res.json();
+      setIsSubscribed(data.isPro === true);
+      setRezPoints(typeof data.credits === 'number' ? data.credits : 3);
+    } catch {
+      // silent fail, badge just won't update this load
+    }
+  };
+
   useEffect(() => {
     if (!isSignedIn) return;
-    (async () => {
-      try {
-        const res = await fetch('/api/credits');
-        if (!res.ok) return;
-        const data = await res.json();
-        setIsSubscribed(data.isPro === true);
-        setRezPoints(typeof data.credits === 'number' ? data.credits : 3);
-      } catch {
-        // silent fail, badge just won't update this load
-      }
-    })();
+    refreshCredits();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSignedIn]);
 
+  // Handle the return from Stripe Checkout (?success=true / ?canceled=true):
+  // show a confirmation, refresh credit/Pro state, and strip the param so
+  // a refresh doesn't re-trigger the notice.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const succeeded = params.get('success') === 'true';
+    const canceled = params.get('canceled') === 'true';
+    if (!succeeded && !canceled) return;
+    window.history.replaceState({}, '', window.location.pathname);
+    setCheckoutNotice(succeeded ? 'success' : 'canceled');
+  }, []);
+
+  // After a successful checkout the Stripe webhook flips Pro in Clerk
+  // metadata asynchronously — poll the credits endpoint a few times so
+  // the new state shows up without the user having to reload.
+  useEffect(() => {
+    if (checkoutNotice !== 'success' || !isSignedIn) return;
+    refreshCredits();
+    const timers = [2000, 5000, 9000].map((ms) => setTimeout(refreshCredits, ms));
+    return () => timers.forEach(clearTimeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checkoutNotice, isSignedIn]);
+
   const handleStripeCheckout = async () => {
+    if (isSubscribed) return; // Already Pro — never start a second subscription
     if (!isSignedIn) return openSignIn();
     setCheckoutLoading(true);
     try {
       const res = await fetch('/api/checkout', { method: 'POST' });
       const data = await res.json();
-      if (data.url) window.location.href = data.url;
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || 'Could not start checkout. Please try again.');
+      }
     } catch {
       alert('Error connecting to Checkout');
     } finally {
@@ -531,18 +564,50 @@ export default function Home() {
             >
               My Resumes
             </button>
-            <button
-              onClick={handleStripeCheckout}
-              disabled={checkoutLoading}
-              className="bg-amber-400 text-slate-950 font-semibold px-3.5 py-1.5 rounded-lg text-xs hover:bg-amber-300 transition shadow"
-            >
-              Get 7 days free
-            </button>
+            {!isSubscribed && (
+              <button
+                onClick={handleStripeCheckout}
+                disabled={checkoutLoading}
+                className="bg-amber-400 text-slate-950 font-semibold px-3.5 py-1.5 rounded-lg text-xs hover:bg-amber-300 transition shadow"
+              >
+                Get 7 days free
+              </button>
+            )}
             <ClerkLoaded>
               {!isSignedIn ? <SignInButton mode="modal" /> : <UserButton />}
             </ClerkLoaded>
           </div>
         </header>
+
+        {/* Checkout return notice */}
+        {checkoutNotice && (
+          <div
+            className={`flex items-start justify-between gap-3 rounded-xl border px-4 py-3 text-xs print:hidden ${
+              checkoutNotice === 'success'
+                ? 'border-emerald-800/60 bg-emerald-950/40 text-emerald-200'
+                : 'border-slate-700 bg-slate-900 text-slate-300'
+            }`}
+          >
+            <p className="leading-relaxed">
+              {checkoutNotice === 'success' ? (
+                <>
+                  🎉 <span className="font-semibold text-white">You&apos;re Pro!</span> Your
+                  subscription is active and unlimited downloads are unlocked. If Pro status
+                  doesn&apos;t appear within a few seconds, refresh the page.
+                </>
+              ) : (
+                <>Checkout was canceled — no charge was made. You can upgrade anytime.</>
+              )}
+            </p>
+            <button
+              onClick={() => setCheckoutNotice(null)}
+              className="shrink-0 text-slate-400 hover:text-white"
+              aria-label="Dismiss"
+            >
+              ✕
+            </button>
+          </div>
+        )}
 
         {/* Welcome Section */}
         <div className="space-y-1 print:hidden">
