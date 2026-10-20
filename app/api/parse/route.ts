@@ -8,6 +8,30 @@ const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
 const GENERIC_ERROR = 'Something went wrong — please try again';
 
+// Hard ceiling on a single extraction. Locally, pdfjs rejects corrupt
+// files fast — but in the serverless runtime a plain-text file renamed
+// to .pdf made getDocumentProxy/extractText spin past 60s with no
+// rejection, so the user stared at a spinner until the platform killed
+// the function. Racing each extraction against this timer turns any
+// pathological input into the generic JSON 500 below (the existing
+// per-format catch logs the timeout server-side). 25s is generous for
+// a ≤10 MB resume and well inside platform limits.
+const EXTRACTION_TIMEOUT_MS = 25_000;
+
+function withExtractionTimeout<T>(promise: Promise<T>, format: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      reject(
+        new Error(`${format} extraction timed out after ${EXTRACTION_TIMEOUT_MS / 1000}s`)
+      );
+    }, EXTRACTION_TIMEOUT_MS);
+  });
+  return Promise.race([promise, timeout]).finally(() => {
+    if (timer) clearTimeout(timer);
+  });
+}
+
 // PDF text extraction via unpdf, imported dynamically inside this
 // function. Two reasons, both learned from a production outage:
 //  1. The previous engine (pdf-parse v2 / pdfjs-dist) was statically
@@ -86,7 +110,7 @@ export async function POST(req: Request) {
 
     if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
       try {
-        extractedText = await extractPdfText(buffer);
+        extractedText = await withExtractionTimeout(extractPdfText(buffer), 'PDF');
       } catch (error) {
         console.error('PDF parse error:', error);
         return NextResponse.json({ error: GENERIC_ERROR }, { status: 500 });
@@ -96,7 +120,7 @@ export async function POST(req: Request) {
       file.name.endsWith('.docx')
     ) {
       try {
-        extractedText = await extractDocxText(buffer);
+        extractedText = await withExtractionTimeout(extractDocxText(buffer), 'DOCX');
       } catch (error) {
         console.error('DOCX parse error:', error);
         return NextResponse.json({ error: GENERIC_ERROR }, { status: 500 });
