@@ -22,6 +22,11 @@ export async function POST(req: Request) {
         },
       ],
       mode: 'subscription',
+      // The UI promises "7 days free" — grant the trial the button
+      // advertises (owner decision, Oct 19, 2026).
+      subscription_data: {
+        trial_period_days: 7,
+      },
       customer_email: email,
       metadata: {
         userId: userId,
