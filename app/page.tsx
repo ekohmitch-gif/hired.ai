@@ -145,7 +145,6 @@ export default function Home() {
   useEffect(() => {
     if (!isSignedIn) return;
     refreshCredits();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSignedIn]);
 
   // Handle the return from Stripe Checkout (?success=true / ?canceled=true):
@@ -168,7 +167,6 @@ export default function Home() {
     refreshCredits();
     const timers = [2000, 5000, 9000].map((ms) => setTimeout(refreshCredits, ms));
     return () => timers.forEach(clearTimeout);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [checkoutNotice, isSignedIn]);
 
   const handleStripeCheckout = async () => {
@@ -679,7 +677,7 @@ export default function Home() {
             Welcome, {isSignedIn && user?.firstName ? user.firstName : 'there'}!
           </p>
           <p className="text-xs text-slate-400">
-            Drop in your resume and a job description to get your Match Rate in about 30 seconds. Free to build and preview — sign in when you're ready to download.
+            Drop in your resume and a job description to get your Match Rate in about 30 seconds. Free to build and preview — sign in when you&apos;re ready to download.
           </p>
         </div>
 
@@ -1328,7 +1326,7 @@ export default function Home() {
               <p className="text-xs text-slate-500 italic py-6 text-center">Loading...</p>
             ) : savedResumes.length === 0 ? (
               <p className="text-xs text-slate-500 italic py-6 text-center">
-                No saved resumes yet. Generate one and hit "Save" to keep it here.
+                No saved resumes yet. Generate one and hit &quot;Save&quot; to keep it here.
               </p>
             ) : (
               <div className="space-y-2">

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { stripe } from '@/lib/stripe';
 
-export async function POST(req: Request) {
+export async function POST() {
   try {
     const { userId } = await auth();
     const user = await currentUser();
