@@ -1,22 +1,42 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { isRateLimited } from '@/lib/rate-limit';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// Input cap for this anonymous endpoint: the caller's section text is
+// the bulk of the request, so it carries the limit.
+const MAX_PROMPT_CHARS = 10_000;
+
 export async function POST(req: Request) {
   try {
+    if (isRateLimited(req, 'generate-section', 30, 60_000)) {
+      return NextResponse.json(
+        { error: 'Too many requests — please wait a minute and try again.' },
+        { status: 429 }
+      );
+    }
+
     const { section, prompt, targetRole } = await req.json();
 
     if (!section || !prompt) {
       return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
     }
 
+    if (typeof prompt === 'string' && prompt.length > MAX_PROMPT_CHARS) {
+      return NextResponse.json(
+        { error: 'That text is too long. Please keep it under 10,000 characters.' },
+        { status: 413 }
+      );
+    }
+
     const systemPrompt = `You are an executive resume writer. Generate high-impact content for the '${section}' section of a resume. Target Role/Industry: ${targetRole || 'General Professional'}. Return clear, concise, actionable output without fluff.`;
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
+      max_tokens: 1500,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: prompt },
@@ -26,6 +46,10 @@ export async function POST(req: Request) {
     const output = completion.choices[0].message.content || '';
     return NextResponse.json({ output });
   } catch (error: any) {
-    return NextResponse.json({ error: error?.message || 'Generation failed' }, { status: 500 });
+    console.error('Section generation error:', error);
+    return NextResponse.json(
+      { error: 'Something went wrong — please try again' },
+      { status: 500 }
+    );
   }
 }

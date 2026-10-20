@@ -1,23 +1,56 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { isRateLimited } from '@/lib/rate-limit';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// Input caps for this anonymous endpoint (the free scan is intentionally
+// open — sign-in is only required to download). Caps keep one caller
+// from turning a single request into an outsized OpenAI bill.
+const MAX_RESUME_CHARS = 60_000;
+const MAX_JOB_DESCRIPTION_CHARS = 30_000;
+
 export async function POST(req: Request) {
   try {
+    if (isRateLimited(req, 'generate', 20, 60_000)) {
+      return NextResponse.json(
+        { error: 'Too many scans — please wait a minute and try again.' },
+        { status: 429 }
+      );
+    }
+
     const { resumeText, jobDescription } = await req.json();
 
-    if (!resumeText || !jobDescription) {
+    if (
+      typeof resumeText !== 'string' ||
+      typeof jobDescription !== 'string' ||
+      !resumeText ||
+      !jobDescription
+    ) {
       return NextResponse.json(
         { error: 'Missing resume text or job description' },
         { status: 400 }
       );
     }
 
+    if (
+      resumeText.length > MAX_RESUME_CHARS ||
+      jobDescription.length > MAX_JOB_DESCRIPTION_CHARS
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            'That input is too long. Please keep the resume under 60,000 characters and the job description under 30,000.',
+        },
+        { status: 413 }
+      );
+    }
+
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
+      max_tokens: 8000,
       messages: [
         {
           role: 'system',
@@ -91,7 +124,7 @@ You MUST return your response ONLY in valid JSON matching this exact structure:
   } catch (error: any) {
     console.error('Error generating resume:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to process resume' },
+      { error: 'Something went wrong — please try again' },
       { status: 500 }
     );
   }
