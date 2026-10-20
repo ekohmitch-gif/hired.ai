@@ -1,11 +1,9 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  // pdf-parse (built on pdfjs-dist) locates its pdf.worker file relative
-  // to its own package at runtime. Bundling it breaks that lookup
-  // ("Setting up fake worker failed: Cannot find module pdf.worker.mjs"),
-  // so load it from node_modules on the server instead.
-  serverExternalPackages: ["pdf-parse"],
-};
+// No serverExternalPackages: the parse route's PDF engine (unpdf) is a
+// serverless build with no external worker file, so nothing needs to be
+// excluded from bundling. (pdf-parse/pdfjs-dist previously needed the
+// exemption — and its worker file still failed to load in production.)
+const nextConfig: NextConfig = {};
 
 export default nextConfig;
