@@ -197,7 +197,13 @@ export default function Home() {
     try {
       const res = await fetch('/api/parse', { method: 'POST', body: formData });
       const data = await res.json();
-      if (data.text) setResumeText(data.text || '');
+      if (data.text) {
+        setResumeText(data.text || '');
+      } else {
+        // Surface server-side parse failures — a rejected or unreadable
+        // file used to fail silently here (review N6).
+        alert(data.error || 'Could not read that file. Please try a different document.');
+      }
     } catch {
       alert('Error parsing document');
     } finally {
@@ -344,8 +350,11 @@ export default function Home() {
 
   const handleSelectTemplate = (t: ResumeTemplate) => {
     if (t !== 'classic' && !isSubscribed) {
-      alert('This template is a premium feature. Upgrade to unlock all 3 templates.');
-      return;
+      // Premium template — route to the real upgrade path instead of a
+      // dead-end alert: sign in first if needed, otherwise straight to
+      // checkout (review C4).
+      if (!isSignedIn) return openSignIn();
+      return handleStripeCheckout();
     }
     setSelectedTemplate(t);
   };
