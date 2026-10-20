@@ -153,7 +153,7 @@ export async function POST(req: Request) {
         const safeName = (result.fullName || 'resume').replace(/\s+/g, '_');
 
         if (format === 'docx') {
-          buffer = await buildDocx(result);
+          buffer = await buildDocx(result, template);
           contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
           filename = `${safeName}.docx`;
         } else {
@@ -208,24 +208,62 @@ export async function POST(req: Request) {
   }
 }
 
-async function buildDocx(result: any) {
+// Per-template DOCX styling, mirroring lib/ResumePdfDocument's PDF
+// themes (the DOCX builder used to ignore the selected template
+// entirely — review L5).
+const DOCX_THEMES: Record<ResumeTemplate, { font: string; nameColor: string; headingColor: string; contactColor: string }> = {
+  classic: { font: 'Times New Roman', nameColor: '1A1A1A', headingColor: '92400E', contactColor: '404040' },
+  modern: { font: 'Calibri', nameColor: '0F172A', headingColor: '0F172A', contactColor: 'B45309' },
+  minimal: { font: 'Calibri', nameColor: '1E293B', headingColor: '64748B', contactColor: '64748B' },
+};
+
+async function buildDocx(result: any, template: ResumeTemplate = 'classic') {
+  const theme = DOCX_THEMES[template] || DOCX_THEMES.classic;
+  const sectionHeading = (text: string) =>
+    new Paragraph({
+      heading: HeadingLevel.HEADING_2,
+      spacing: { before: 200 },
+      children: [
+        new TextRun({ text, bold: true, color: theme.headingColor, font: theme.font, size: 24 }),
+      ],
+    });
+
   const children: Paragraph[] = [];
 
-  children.push(new Paragraph({ text: result.fullName || 'Candidate Name', heading: HeadingLevel.TITLE }));
-  children.push(new Paragraph({ children: [new TextRun({ text: result.contactInfo || '', italics: true })] }));
+  children.push(
+    new Paragraph({
+      heading: HeadingLevel.TITLE,
+      children: [
+        new TextRun({
+          text: result.fullName || 'Candidate Name',
+          bold: true,
+          color: theme.nameColor,
+          font: theme.font,
+          size: 36,
+        }),
+      ],
+    })
+  );
+  children.push(
+    new Paragraph({
+      children: [
+        new TextRun({ text: result.contactInfo || '', italics: true, color: theme.contactColor, font: theme.font }),
+      ],
+    })
+  );
 
   if (result.summary) {
-    children.push(new Paragraph({ text: 'Professional Summary', heading: HeadingLevel.HEADING_2, spacing: { before: 200 } }));
+    children.push(sectionHeading('Professional Summary'));
     children.push(new Paragraph({ text: result.summary }));
   }
 
   if (result.skills?.length) {
-    children.push(new Paragraph({ text: 'Core Competencies', heading: HeadingLevel.HEADING_2, spacing: { before: 200 } }));
+    children.push(sectionHeading('Core Competencies'));
     children.push(new Paragraph({ text: result.skills.join('   •   ') }));
   }
 
   if (result.experience?.length) {
-    children.push(new Paragraph({ text: 'Professional Experience', heading: HeadingLevel.HEADING_2, spacing: { before: 200 } }));
+    children.push(sectionHeading('Professional Experience'));
     result.experience.forEach((exp: any) => {
       children.push(
         new Paragraph({
@@ -243,7 +281,7 @@ async function buildDocx(result: any) {
   }
 
   if (result.projects?.length) {
-    children.push(new Paragraph({ text: 'Projects', heading: HeadingLevel.HEADING_2, spacing: { before: 200 } }));
+    children.push(sectionHeading('Projects'));
     result.projects.forEach((proj: any) => {
       children.push(
         new Paragraph({
@@ -263,7 +301,7 @@ async function buildDocx(result: any) {
   }
 
   if (result.education?.length) {
-    children.push(new Paragraph({ text: 'Education', heading: HeadingLevel.HEADING_2, spacing: { before: 200 } }));
+    children.push(sectionHeading('Education'));
     result.education.forEach((edu: any) => {
       children.push(
         new Paragraph({
@@ -276,7 +314,10 @@ async function buildDocx(result: any) {
     });
   }
 
-  const doc = new Document({ sections: [{ children }] });
+  const doc = new Document({
+    styles: { default: { document: { run: { font: theme.font } } } },
+    sections: [{ children }],
+  });
   return Packer.toBuffer(doc);
 }
 
