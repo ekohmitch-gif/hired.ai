@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 import { SignInButton, UserButton, useUser, useClerk, ClerkLoaded } from '@clerk/nextjs';
 
 interface ExperienceItem {
@@ -1196,6 +1197,19 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* Site Footer */}
+      <footer className="max-w-7xl mx-auto mt-10 border-t border-slate-800 pt-5 pb-2 flex flex-col sm:flex-row items-center justify-between gap-3 print:hidden">
+        <p className="text-[11px] text-slate-500">
+          Enhancerez<span className="text-amber-400">.com</span> — AI Resume Builder
+        </p>
+        <nav className="flex items-center gap-4 text-[11px] text-slate-400">
+          <Link href="/pricing" className="hover:text-amber-400 transition">Pricing</Link>
+          <Link href="/terms" className="hover:text-amber-400 transition">Terms</Link>
+          <Link href="/privacy" className="hover:text-amber-400 transition">Privacy</Link>
+          <Link href="/contact" className="hover:text-amber-400 transition">Contact</Link>
+        </nav>
+      </footer>
     </main>
   );
 }
