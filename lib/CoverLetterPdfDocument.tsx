@@ -6,6 +6,7 @@ const styles = StyleSheet.create({
   contact: { fontSize: 9, color: '#555', marginBottom: 20 },
   date: { fontSize: 9.5, color: '#555', marginBottom: 16 },
   paragraph: { marginBottom: 10 },
+  closing: { marginTop: 6, marginBottom: 2 },
 });
 
 export function CoverLetterPdfDocument({
@@ -22,13 +23,18 @@ export function CoverLetterPdfDocument({
 
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
+      <Page size="LETTER" style={styles.page}>
         <Text style={styles.name}>{fullName || 'Candidate Name'}</Text>
         <Text style={styles.contact}>{contactInfo || ''}</Text>
         <Text style={styles.date}>{today}</Text>
+        {/* The generator returns body paragraphs only — the salutation
+            and closing signature are added here, as its prompt intends. */}
+        <Text style={styles.paragraph}>Dear Hiring Manager,</Text>
         {paragraphs.map((p, i) => (
           <Text key={i} style={styles.paragraph}>{p.trim()}</Text>
         ))}
+        <Text style={styles.closing}>Sincerely,</Text>
+        <Text>{fullName || ''}</Text>
       </Page>
     </Document>
   );

@@ -96,7 +96,7 @@ export function ResumePdfDocument({
 
   return (
     <Document>
-      <Page size="A4" style={s.page}>
+      <Page size="LETTER" style={s.page}>
         {template === 'modern' ? (
           <View style={s.headerBar}>{headerContent}</View>
         ) : (
@@ -132,6 +132,22 @@ export function ResumePdfDocument({
                   {(exp.bullets || []).map((b: string, bi: number) => (
                     <Text key={bi} style={s.bullet}>• {b}</Text>
                   ))}
+                </View>
+              ))}
+            </>
+          )}
+
+          {result.projects?.length > 0 && (
+            <>
+              <Text style={s.sectionTitle}>Projects</Text>
+              {result.projects.map((proj: any, i: number) => (
+                <View key={i}>
+                  <View style={s.expRow}>
+                    <Text style={s.expTitle}>
+                      {proj.title} {proj.role ? `— ${proj.role}` : ''}
+                    </Text>
+                  </View>
+                  {proj.description && <Text style={s.text}>{proj.description}</Text>}
                 </View>
               ))}
             </>
