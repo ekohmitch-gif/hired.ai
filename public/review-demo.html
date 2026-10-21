@@ -3,88 +3,89 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Review Engine — Live Demo</title>
+<title>Review Engine: Live Demo</title>
 <style>
   :root{
-    --navy:#0f1c2e; --navy2:#16283f; --ink:#14202e; --muted:#5b6b7c;
-    --amber:#f5a623; --amber-dark:#d98a06; --green:#1e9e6a; --red:#d95f4b;
-    --line:#dde4ea; --bg:#eef2f6; --card:#ffffff;
+    --ink:#171a21; --body:#3d434d; --muted:#6f7683;
+    --line:#e6e8ec; --accent:#2563eb; --accent-dark:#1d4ed8; --tint:#eef3fd;
+    --bg:#f7f8fa; --soft:#f8f9fb; --card:#ffffff;
+    --shadow:0 1px 2px rgba(23,26,33,.04), 0 12px 32px rgba(23,26,33,.05);
   }
   *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;}
-  .wrap{max-width:430px;margin:0 auto;padding:0 16px 48px;}
+  body{font-family:-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--body);-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:430px;margin:0 auto;padding:0 16px 52px;}
 
   /* ---------- Header ---------- */
-  header{background:var(--navy);color:#fff;padding:20px 20px 18px;border-radius:0 0 20px 20px;margin:0 -16px 22px;}
-  .brand{font-size:12px;letter-spacing:2.5px;text-transform:uppercase;color:var(--amber);font-weight:700;}
-  header h1{font-size:26px;line-height:1.15;margin-top:6px;font-weight:800;}
-  header p{font-size:14px;color:#c4d2df;margin-top:6px;line-height:1.45;}
-  .sample-tag{display:inline-block;margin-top:12px;background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.55);color:#ffd98a;font-size:11.5px;font-weight:600;padding:5px 10px;border-radius:999px;letter-spacing:.3px;}
+  header{padding:34px 6px 26px;text-align:left;}
+  .brand{font-size:11.5px;letter-spacing:2.4px;text-transform:uppercase;color:var(--accent);font-weight:700;display:flex;align-items:center;gap:8px;}
+  .brand::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent);flex:none;}
+  header h1{font-size:29px;line-height:1.16;margin-top:12px;font-weight:700;color:var(--ink);letter-spacing:-.02em;}
+  header p{font-size:14.5px;color:var(--muted);margin-top:9px;line-height:1.55;}
+  .sample-tag{display:inline-flex;align-items:center;gap:7px;margin-top:16px;background:#fff;border:1px solid var(--line);color:var(--body);font-size:11.5px;font-weight:600;padding:6px 11px;border-radius:999px;letter-spacing:.3px;box-shadow:0 1px 2px rgba(23,26,33,.04);}
+  .sample-tag::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);flex:none;}
 
   /* ---------- Step scaffolding ---------- */
-  .step{margin-top:30px;}
-  .step-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
-  .step-num{width:28px;height:28px;border-radius:50%;background:var(--navy);color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;}
-  .step-head h2{font-size:17px;font-weight:700;}
+  .step{margin-top:34px;}
+  .step-head{display:flex;align-items:center;gap:11px;margin-bottom:13px;padding:0 2px;}
+  .step-num{width:27px;height:27px;border-radius:50%;background:#fff;border:1px solid var(--line);color:var(--accent-dark);font-size:13.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;}
+  .step-head h2{font-size:16.5px;font-weight:650;color:var(--ink);letter-spacing:-.01em;}
   .step-head p{font-size:12.5px;color:var(--muted);margin-top:1px;}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 1px 3px rgba(15,28,46,.05);}
-  .sample-note{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;font-weight:700;margin-bottom:12px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow);}
+  .sample-note{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:1.3px;font-weight:700;margin-bottom:13px;}
 
   /* ---------- Phone / SMS thread ---------- */
-  .phone{background:#f6f8fa;border:1px solid var(--line);border-radius:18px;padding:16px 14px;}
-  .sms-from{text-align:center;font-size:12px;color:var(--muted);margin-bottom:12px;}
-  .sms-from strong{color:var(--ink);display:block;font-size:13.5px;}
-  .bubble{background:#e9edf1;border-radius:18px;border-bottom-left-radius:6px;padding:12px 14px;font-size:14.5px;line-height:1.5;max-width:92%;}
-  .bubble .q{font-weight:600;}
+  .phone{background:var(--soft);border:1px solid var(--line);border-radius:16px;padding:17px 15px;}
+  .sms-from{text-align:center;font-size:12px;color:var(--muted);margin-bottom:13px;}
+  .sms-from strong{color:var(--ink);display:block;font-size:13.5px;font-weight:650;}
+  .bubble{background:#fff;border:1px solid var(--line);border-radius:18px;border-bottom-left-radius:6px;padding:12px 14px;font-size:14.5px;line-height:1.5;color:var(--body);max-width:92%;box-shadow:0 1px 2px rgba(23,26,33,.04);}
+  .bubble .q{font-weight:600;color:var(--ink);}
   .tap-row{display:flex;gap:10px;margin-top:14px;}
-  .tap{flex:1;text-align:center;padding:13px 6px;border-radius:12px;font-size:15px;font-weight:700;border:2px solid transparent;}
-  .tap-happy{background:#e5f5ee;color:var(--green);border-color:#bfe6d4;}
-  .tap-meh{background:#fdeeea;color:var(--red);border-color:#f6cfc7;}
-  .tap small{display:block;font-weight:600;font-size:11.5px;margin-top:2px;opacity:.85;}
+  .tap{flex:1;text-align:center;padding:13px 6px;border-radius:12px;font-size:15px;font-weight:650;border:1px solid var(--line);background:#fff;color:var(--ink);}
+  .tap-happy{background:var(--tint);color:var(--accent-dark);border-color:#cfdefa;}
+  .tap-meh{background:#f4f5f6;}
+  .tap small{display:block;font-weight:600;font-size:11.5px;margin-top:2px;opacity:.8;}
 
   /* ---------- Routing ---------- */
   .route{display:flex;flex-direction:column;gap:12px;}
-  .route-box{border-radius:14px;padding:15px 16px;border:1.5px solid var(--line);}
-  .route-box.g{border-color:#bfe6d4;background:#f2faf6;}
-  .route-box.p{border-color:#f6cfc7;background:#fdf4f2;}
-  .route-box .stars{color:var(--amber);font-size:17px;letter-spacing:2px;}
-  .route-box h3{font-size:15px;margin:3px 0 4px;}
-  .route-box p{font-size:13.5px;color:#41505e;line-height:1.5;}
-  .form-mock{margin-top:10px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:11px 12px;font-size:13px;color:var(--muted);line-height:1.5;}
-  .form-mock .send{margin-top:9px;display:inline-block;background:var(--navy);color:#fff;font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:8px;}
+  .route-box{border-radius:16px;padding:17px 18px;border:1px solid var(--line);background:#fff;box-shadow:var(--shadow);}
+  .route-box.g{background:var(--tint);border-color:#d7e3fb;box-shadow:none;}
+  .route-box .stars{color:var(--accent);font-size:16px;letter-spacing:2px;}
+  .route-box h3{font-size:15px;margin:3px 0 4px;color:var(--ink);font-weight:650;}
+  .route-box p{font-size:13.5px;color:var(--body);line-height:1.55;}
+  .form-mock{margin-top:11px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:11px 12px;font-size:13px;color:var(--muted);line-height:1.5;}
+  .form-mock .send{margin-top:9px;display:inline-block;background:var(--accent);color:#fff;font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:8px;}
 
   /* ---------- Owner screen ---------- */
   .review-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
-  .reviewer{font-size:14.5px;font-weight:700;}
+  .reviewer{font-size:14.5px;font-weight:650;color:var(--ink);}
   .reviewer span{display:block;font-weight:500;font-size:12px;color:var(--muted);margin-top:1px;}
-  .new-badge{background:var(--amber);color:#231600;font-size:11px;font-weight:800;padding:4px 9px;border-radius:999px;letter-spacing:.4px;flex:none;}
-  .review-stars{color:var(--amber);font-size:16px;letter-spacing:2px;margin-top:8px;}
-  .review-text{font-size:14.5px;line-height:1.55;margin-top:6px;color:#2a3745;}
-  .draft{margin-top:14px;background:#f6f8fa;border:1px dashed #b9c6d2;border-radius:12px;padding:13px 14px;}
-  .draft .draft-label{font-size:11px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:var(--navy);margin-bottom:6px;}
-  .draft p{font-size:14px;line-height:1.55;color:#2a3745;}
-  .approve-row{display:flex;gap:10px;margin-top:14px;}
-  .btn-approve{flex:1;background:var(--green);color:#fff;text-align:center;font-weight:700;font-size:15px;padding:13px;border-radius:11px;}
-  .btn-edit{flex:0 0 96px;background:#fff;border:1.5px solid var(--line);color:var(--ink);text-align:center;font-weight:600;font-size:15px;padding:13px;border-radius:11px;}
-  .owner-note{font-size:12.5px;color:var(--muted);margin-top:11px;line-height:1.5;text-align:center;}
+  .new-badge{background:var(--tint);color:var(--accent-dark);font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:999px;letter-spacing:.5px;flex:none;}
+  .review-stars{color:var(--accent);font-size:16px;letter-spacing:2px;margin-top:9px;}
+  .review-text{font-size:14.5px;line-height:1.55;margin-top:6px;color:var(--body);}
+  .draft{margin-top:15px;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:14px 15px;}
+  .draft .draft-label{font-size:10.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent-dark);margin-bottom:6px;}
+  .draft p{font-size:14px;line-height:1.55;color:var(--body);}
+  .approve-row{display:flex;gap:10px;margin-top:15px;}
+  .btn-approve{flex:1;background:var(--accent);color:#fff;text-align:center;font-weight:650;font-size:15px;padding:13px;border-radius:11px;}
+  .btn-edit{flex:0 0 96px;background:#fff;border:1px solid var(--line);color:var(--ink);text-align:center;font-weight:600;font-size:15px;padding:13px;border-radius:11px;}
+  .owner-note{font-size:12.5px;color:var(--muted);margin-top:12px;line-height:1.5;text-align:center;}
 
   /* ---------- Pricing strip ---------- */
-  .pricing{background:var(--navy);color:#fff;border-radius:18px;padding:22px 20px;margin-top:34px;}
-  .pricing h2{font-size:19px;font-weight:800;}
-  .price-row{display:flex;gap:12px;margin-top:16px;}
-  .price-box{flex:1;border-radius:13px;padding:14px;}
-  .price-box.ours{background:rgba(245,166,35,.13);border:1.5px solid var(--amber);}
-  .price-box.theirs{background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.18);}
-  .price-box .who{font-size:11.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#aebfcf;}
-  .price-box.ours .who{color:var(--amber);}
-  .price-box .amt{font-size:30px;font-weight:800;margin-top:5px;}
-  .price-box .amt small{font-size:13px;font-weight:600;color:#aebfcf;}
-  .price-box .per{font-size:12.5px;color:#c4d2df;margin-top:2px;line-height:1.45;}
-  .guarantee{margin-top:16px;background:#fff;color:var(--navy);border-radius:12px;padding:14px 16px;font-size:15.5px;font-weight:800;text-align:center;line-height:1.4;}
-  .guarantee span{color:var(--amber-dark);}
-  .fineprint{font-size:11.5px;color:#8fa3b5;text-align:center;margin-top:12px;line-height:1.5;}
+  .pricing{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px 22px;margin-top:38px;box-shadow:var(--shadow);}
+  .pricing h2{font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-.01em;}
+  .price-row{display:flex;gap:12px;margin-top:17px;}
+  .price-box{flex:1;border-radius:13px;padding:15px;border:1px solid var(--line);background:#fff;}
+  .price-box.ours{background:var(--tint);border-color:#cfdefa;}
+  .price-box .who{font-size:11px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);}
+  .price-box.ours .who{color:var(--accent-dark);}
+  .price-box .amt{font-size:29px;font-weight:700;color:var(--ink);margin-top:5px;letter-spacing:-.02em;}
+  .price-box .amt small{font-size:13px;font-weight:600;color:var(--muted);}
+  .price-box .per{font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.5;}
+  .guarantee{margin-top:16px;background:var(--tint);color:var(--ink);border-radius:12px;padding:15px 16px;font-size:15.5px;font-weight:700;text-align:center;line-height:1.45;}
+  .guarantee span{color:var(--accent-dark);}
+  .fineprint{font-size:11.5px;color:var(--muted);text-align:center;margin-top:13px;line-height:1.5;}
 
-  footer{margin-top:26px;text-align:center;font-size:12.5px;color:var(--muted);line-height:1.6;}
+  footer{margin-top:30px;padding-top:20px;border-top:1px solid var(--line);text-align:center;font-size:12.5px;color:var(--muted);line-height:1.65;}
   footer strong{color:var(--ink);}
 </style>
 </head>
@@ -94,7 +95,7 @@
   <header>
     <div class="brand">Review Engine</div>
     <h1>Your next review,<br>handled automatically.</h1>
-    <p>Here's exactly what your customers see — and what lands on your phone — after every job.</p>
+    <p>Here's exactly what your customers see, and what lands on your phone, after every job.</p>
     <span class="sample-tag">SAMPLE DEMO &nbsp;·&nbsp; Mike's Auto Repair</span>
   </header>
 
@@ -108,11 +109,11 @@
       </div>
     </div>
     <div class="card">
-      <div class="sample-note">Sample — customer's phone</div>
+      <div class="sample-note">Sample: customer's phone</div>
       <div class="phone">
         <div class="sms-from"><strong>Mike's Auto Repair</strong>Text message · Today 2:14 PM</div>
         <div class="bubble">
-          Hi James, thanks for bringing your F-150 in today. Quick question — <span class="q">how did we do?</span>
+          Hi James, thanks for bringing your F-150 in today. Quick question. <span class="q">How did we do?</span>
         </div>
         <div class="tap-row">
           <div class="tap tap-happy">👍 &nbsp;Great<small>Tap happy</small></div>
@@ -135,13 +136,13 @@
       <div class="route-box g">
         <div class="stars">★★★★★</div>
         <h3>Happy → straight to Google</h3>
-        <p>They're taken right to your Google review page while the good visit is fresh — one more tap and it's posted.</p>
+        <p>They're taken right to your Google review page while the good visit is fresh. One more tap and it's posted.</p>
       </div>
       <div class="route-box p">
         <h3>Unhappy → a private form, just for you</h3>
         <p>No public review. You hear about it first, while there's still time to make it right.</p>
         <div class="form-mock">
-          "Tell us what happened — the owner reads every one of these personally."
+          "Tell us what happened, the owner reads every one of these personally."
           <br><span class="send">Send privately</span>
         </div>
       </div>
@@ -154,11 +155,11 @@
       <div class="step-num">3</div>
       <div>
         <h2>You approve the reply in one tap</h2>
-        <p>Every review answered — written for that customer, not a template</p>
+        <p>Every review answered, written for that customer, not a template</p>
       </div>
     </div>
     <div class="card">
-      <div class="sample-note">Sample — owner's phone</div>
+      <div class="sample-note">Sample: owner's phone</div>
       <div class="review-head">
         <div class="reviewer">James W.<span>Google review · 12 minutes ago</span></div>
         <div class="new-badge">NEW REVIEW</div>
@@ -166,8 +167,8 @@
       <div class="review-stars">★★★★★</div>
       <p class="review-text">"Fast, honest work. They found the electrical issue two other shops missed and had me back on the road the same day."</p>
       <div class="draft">
-        <div class="draft-label">Drafted reply — ready to post</div>
-        <p>James, thank you — electrical problems that hide from two shops are exactly the kind we like solving. Glad the F-150 is back on the road the same day. We'll be here when you need us. — Mike</p>
+        <div class="draft-label">Drafted reply: ready to post</div>
+        <p>James, thank you. Electrical problems that hide from two shops are exactly the kind we like solving. Glad the F-150 is back on the road the same day. We'll be here when you need us, Mike.</p>
       </div>
       <div class="approve-row">
         <div class="btn-approve">Approve &amp; Post</div>
@@ -192,14 +193,14 @@
         <div class="per">Per location, with contracts and add-on fees.</div>
       </div>
     </div>
-    <div class="guarantee">30 more Google reviews in 60 days — <span>or you don't pay.</span></div>
+    <div class="guarantee">30 more Google reviews in 60 days, <span>or you don't pay.</span></div>
     <p class="fineprint">Founding shops lock in $49/month for life.</p>
   </section>
 
   <footer>
     <strong>Mitchell Ekoh</strong> · Software Builder · IT Services<br>
     Computer Science / Cybersecurity, B.S.<br>
-    Builder of EnhanceRez — enhancerez.com<br>
+    Builder of EnhanceRez · enhancerez.com<br>
     470-834-2676 · ekoh.mitch@gmail.com
   </footer>
 
