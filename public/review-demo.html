@@ -6,97 +6,100 @@
 <title>Review Engine: Live Demo</title>
 <style>
   :root{
-    --ink:#171a21; --body:#3d434d; --muted:#6f7683;
-    --line:#e6e8ec; --accent:#2563eb; --accent-dark:#1d4ed8; --tint:#eef3fd;
-    --bg:#f7f8fa; --soft:#f8f9fb; --card:#ffffff;
-    --shadow:0 1px 2px rgba(23,26,33,.04), 0 12px 32px rgba(23,26,33,.05);
+    --ink:#1c1a17; --body:#57534a; --muted:#8d877b;
+    --line:#e6e1d6; --ecru:#f2eee5; --soft:#f5f2ec;
+    --bg:#f8f6f1; --card:#fffefa;
+    --serif:Georgia,"Times New Roman",Times,serif;
+    --shadow:0 1px 2px rgba(28,26,23,.03);
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   body{font-family:-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--body);-webkit-font-smoothing:antialiased;}
-  .wrap{max-width:430px;margin:0 auto;padding:0 16px 52px;}
+  .wrap{max-width:430px;margin:0 auto;padding:0 20px 64px;}
+
+  /* ---------- Sticky top bar ---------- */
+  .topbar{position:sticky;top:0;z-index:50;margin:0 -20px;padding:13px 20px;background:var(--bg);border-bottom:1px solid var(--line);}
+  .topbar-logo{font-size:11px;letter-spacing:3.2px;text-transform:uppercase;color:var(--ink);font-weight:600;}
 
   /* ---------- Header ---------- */
-  header{padding:34px 6px 26px;text-align:left;}
-  .brand{font-size:11.5px;letter-spacing:2.4px;text-transform:uppercase;color:var(--accent);font-weight:700;display:flex;align-items:center;gap:8px;}
-  .brand::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent);flex:none;}
-  header h1{font-size:29px;line-height:1.16;margin-top:12px;font-weight:700;color:var(--ink);letter-spacing:-.02em;}
-  header p{font-size:14.5px;color:var(--muted);margin-top:9px;line-height:1.55;}
-  .sample-tag{display:inline-flex;align-items:center;gap:7px;margin-top:16px;background:#fff;border:1px solid var(--line);color:var(--body);font-size:11.5px;font-weight:600;padding:6px 11px;border-radius:999px;letter-spacing:.3px;box-shadow:0 1px 2px rgba(23,26,33,.04);}
-  .sample-tag::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);flex:none;}
+  header{padding:52px 4px 34px;text-align:left;}
+  .brand{font-size:11px;letter-spacing:3.2px;text-transform:uppercase;color:var(--ink);font-weight:600;}
+  header h1{font-family:var(--serif);font-size:34px;line-height:1.18;margin-top:18px;font-weight:400;color:var(--ink);letter-spacing:.002em;}
+  header p{font-size:14.5px;color:var(--muted);margin-top:14px;line-height:1.65;}
+  .sample-tag{display:inline-block;margin-top:22px;background:transparent;border:1px solid var(--line);color:var(--body);font-size:11px;font-weight:600;padding:7px 13px;border-radius:999px;letter-spacing:1.4px;text-transform:uppercase;}
 
   /* ---------- Step scaffolding ---------- */
-  .step{margin-top:34px;}
-  .step-head{display:flex;align-items:center;gap:11px;margin-bottom:13px;padding:0 2px;}
-  .step-num{width:27px;height:27px;border-radius:50%;background:#fff;border:1px solid var(--line);color:var(--accent-dark);font-size:13.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;}
-  .step-head h2{font-size:16.5px;font-weight:650;color:var(--ink);letter-spacing:-.01em;}
-  .step-head p{font-size:12.5px;color:var(--muted);margin-top:1px;}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow);}
-  .sample-note{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:1.3px;font-weight:700;margin-bottom:13px;}
+  .step{margin-top:46px;}
+  .step-head{display:flex;align-items:center;gap:13px;margin-bottom:16px;padding:0 2px;}
+  .step-num{width:28px;height:28px;border-radius:50%;background:transparent;border:1px solid var(--line);color:var(--ink);font-family:var(--serif);font-size:14px;display:flex;align-items:center;justify-content:center;flex:none;}
+  .step-head h2{font-size:16.5px;font-weight:600;color:var(--ink);letter-spacing:-.01em;}
+  .step-head p{font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.5;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:24px;box-shadow:var(--shadow);}
+  .sample-note{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:1.8px;font-weight:600;margin-bottom:15px;}
 
   /* ---------- Phone / SMS thread ---------- */
-  .phone{background:var(--soft);border:1px solid var(--line);border-radius:16px;padding:17px 15px;}
-  .sms-from{text-align:center;font-size:12px;color:var(--muted);margin-bottom:13px;}
-  .sms-from strong{color:var(--ink);display:block;font-size:13.5px;font-weight:650;}
-  .bubble{background:#fff;border:1px solid var(--line);border-radius:18px;border-bottom-left-radius:6px;padding:12px 14px;font-size:14.5px;line-height:1.5;color:var(--body);max-width:92%;box-shadow:0 1px 2px rgba(23,26,33,.04);}
+  .phone{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:20px 16px;}
+  .sms-from{text-align:center;font-size:12px;color:var(--muted);margin-bottom:15px;}
+  .sms-from strong{color:var(--ink);display:block;font-size:13.5px;font-weight:600;}
+  .bubble{background:var(--card);border:1px solid var(--line);border-radius:16px;border-bottom-left-radius:5px;padding:13px 15px;font-size:14.5px;line-height:1.55;color:var(--body);max-width:92%;}
   .bubble .q{font-weight:600;color:var(--ink);}
-  .tap-row{display:flex;gap:10px;margin-top:14px;}
-  .tap{flex:1;text-align:center;padding:13px 6px;border-radius:12px;font-size:15px;font-weight:650;border:1px solid var(--line);background:#fff;color:var(--ink);}
-  .tap-happy{background:var(--tint);color:var(--accent-dark);border-color:#cfdefa;}
-  .tap-meh{background:#f4f5f6;}
-  .tap small{display:block;font-weight:600;font-size:11.5px;margin-top:2px;opacity:.8;}
+  .tap-row{display:flex;gap:10px;margin-top:16px;}
+  .tap{flex:1;text-align:center;padding:13px 6px;border-radius:10px;font-size:15px;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink);}
+  .tap-happy{background:var(--ink);color:#f8f6f1;border-color:var(--ink);}
+  .tap small{display:block;font-weight:500;font-size:11.5px;margin-top:2px;opacity:.75;}
 
   /* ---------- Routing ---------- */
-  .route{display:flex;flex-direction:column;gap:12px;}
-  .route-box{border-radius:16px;padding:17px 18px;border:1px solid var(--line);background:#fff;box-shadow:var(--shadow);}
-  .route-box.g{background:var(--tint);border-color:#d7e3fb;box-shadow:none;}
-  .route-box .stars{color:var(--accent);font-size:16px;letter-spacing:2px;}
-  .route-box h3{font-size:15px;margin:3px 0 4px;color:var(--ink);font-weight:650;}
-  .route-box p{font-size:13.5px;color:var(--body);line-height:1.55;}
-  .form-mock{margin-top:11px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:11px 12px;font-size:13px;color:var(--muted);line-height:1.5;}
-  .form-mock .send{margin-top:9px;display:inline-block;background:var(--accent);color:#fff;font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:8px;}
+  .route{display:flex;flex-direction:column;gap:14px;}
+  .route-box{border-radius:12px;padding:20px;border:1px solid var(--line);background:var(--card);}
+  .route-box.g{background:var(--ecru);}
+  .route-box .stars{color:var(--ink);font-size:15px;letter-spacing:3px;}
+  .route-box h3{font-size:15px;margin:5px 0 5px;color:var(--ink);font-weight:600;}
+  .route-box p{font-size:13.5px;color:var(--body);line-height:1.6;}
+  .form-mock{margin-top:13px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 13px;font-size:13px;color:var(--muted);line-height:1.55;}
+  .form-mock .send{margin-top:10px;display:inline-block;background:var(--ink);color:#f8f6f1;font-size:12.5px;font-weight:600;padding:7px 15px;border-radius:8px;}
 
   /* ---------- Owner screen ---------- */
   .review-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
-  .reviewer{font-size:14.5px;font-weight:650;color:var(--ink);}
-  .reviewer span{display:block;font-weight:500;font-size:12px;color:var(--muted);margin-top:1px;}
-  .new-badge{background:var(--tint);color:var(--accent-dark);font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:999px;letter-spacing:.5px;flex:none;}
-  .review-stars{color:var(--accent);font-size:16px;letter-spacing:2px;margin-top:9px;}
-  .review-text{font-size:14.5px;line-height:1.55;margin-top:6px;color:var(--body);}
-  .draft{margin-top:15px;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:14px 15px;}
-  .draft .draft-label{font-size:10.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent-dark);margin-bottom:6px;}
-  .draft p{font-size:14px;line-height:1.55;color:var(--body);}
-  .approve-row{display:flex;gap:10px;margin-top:15px;}
-  .btn-approve{flex:1;background:var(--accent);color:#fff;text-align:center;font-weight:650;font-size:15px;padding:13px;border-radius:11px;}
-  .btn-edit{flex:0 0 96px;background:#fff;border:1px solid var(--line);color:var(--ink);text-align:center;font-weight:600;font-size:15px;padding:13px;border-radius:11px;}
-  .owner-note{font-size:12.5px;color:var(--muted);margin-top:12px;line-height:1.5;text-align:center;}
+  .reviewer{font-size:14.5px;font-weight:600;color:var(--ink);}
+  .reviewer span{display:block;font-weight:500;font-size:12px;color:var(--muted);margin-top:2px;}
+  .new-badge{background:var(--ink);color:#f8f6f1;font-size:10px;font-weight:600;padding:5px 10px;border-radius:999px;letter-spacing:1.2px;flex:none;text-transform:uppercase;}
+  .review-stars{color:var(--ink);font-size:15px;letter-spacing:3px;margin-top:11px;}
+  .review-text{font-size:14.5px;line-height:1.6;margin-top:7px;color:var(--body);}
+  .draft{margin-top:18px;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:16px;}
+  .draft .draft-label{font-size:10.5px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+  .draft p{font-size:14px;line-height:1.6;color:var(--body);}
+  .approve-row{display:flex;gap:10px;margin-top:18px;}
+  .btn-approve{flex:1;background:var(--ink);color:#f8f6f1;text-align:center;font-weight:600;font-size:15px;padding:14px;border-radius:10px;}
+  .btn-edit{flex:0 0 96px;background:transparent;border:1px solid var(--line);color:var(--ink);text-align:center;font-weight:600;font-size:15px;padding:14px;border-radius:10px;}
+  .owner-note{font-size:12.5px;color:var(--muted);margin-top:14px;line-height:1.6;text-align:center;}
 
   /* ---------- Pricing strip ---------- */
-  .pricing{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px 22px;margin-top:38px;box-shadow:var(--shadow);}
-  .pricing h2{font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-.01em;}
-  .price-row{display:flex;gap:12px;margin-top:17px;}
-  .price-box{flex:1;border-radius:13px;padding:15px;border:1px solid var(--line);background:#fff;}
-  .price-box.ours{background:var(--tint);border-color:#cfdefa;}
-  .price-box .who{font-size:11px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);}
-  .price-box.ours .who{color:var(--accent-dark);}
-  .price-box .amt{font-size:29px;font-weight:700;color:var(--ink);margin-top:5px;letter-spacing:-.02em;}
-  .price-box .amt small{font-size:13px;font-weight:600;color:var(--muted);}
-  .price-box .per{font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.5;}
-  .guarantee{margin-top:16px;background:var(--tint);color:var(--ink);border-radius:12px;padding:15px 16px;font-size:15.5px;font-weight:700;text-align:center;line-height:1.45;}
-  .guarantee span{color:var(--accent-dark);}
-  .fineprint{font-size:11.5px;color:var(--muted);text-align:center;margin-top:13px;line-height:1.5;}
+  .pricing{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:30px 24px;margin-top:52px;box-shadow:var(--shadow);}
+  .pricing h2{font-family:var(--serif);font-size:22px;font-weight:400;color:var(--ink);}
+  .price-row{display:flex;gap:12px;margin-top:22px;}
+  .price-box{flex:1;border-radius:10px;padding:18px 16px;border:1px solid var(--line);background:var(--card);}
+  .price-box.ours{background:var(--ecru);}
+  .price-box .who{font-size:10.5px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);}
+  .price-box.ours .who{color:var(--ink);}
+  .price-box .amt{font-family:var(--serif);font-size:31px;font-weight:400;color:var(--ink);margin-top:7px;}
+  .price-box .amt small{font-family:-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-size:13px;font-weight:500;color:var(--muted);}
+  .price-box .per{font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.55;}
+  .guarantee{margin-top:20px;background:var(--ink);color:#f5f2ec;border-radius:10px;padding:20px 18px;font-family:var(--serif);font-size:17.5px;font-weight:400;text-align:center;line-height:1.5;}
+  .fineprint{font-size:11.5px;color:var(--muted);text-align:center;margin-top:16px;line-height:1.55;}
 
-  footer{margin-top:30px;padding-top:20px;border-top:1px solid var(--line);text-align:center;font-size:12.5px;color:var(--muted);line-height:1.65;}
-  footer strong{color:var(--ink);}
+  footer{margin-top:40px;padding-top:24px;border-top:1px solid var(--line);text-align:center;font-size:12.5px;color:var(--muted);line-height:1.7;}
+  footer strong{color:var(--ink);letter-spacing:1.6px;text-transform:uppercase;font-size:11.5px;}
 </style>
 </head>
 <body>
 <div class="wrap">
 
+  <div class="topbar"><span class="topbar-logo">Review Engine</span></div>
+
   <header>
     <div class="brand">Review Engine</div>
     <h1>Your next review,<br>handled automatically.</h1>
     <p>Here's exactly what your customers see, and what lands on your phone, after every job.</p>
-    <span class="sample-tag">SAMPLE DEMO &nbsp;·&nbsp; Mike's Auto Repair</span>
+    <span class="sample-tag">Sample Demo &nbsp;·&nbsp; Mike's Auto Repair</span>
   </header>
 
   <!-- STEP 1 : the customer's text -->
@@ -162,7 +165,7 @@
       <div class="sample-note">Sample: owner's phone</div>
       <div class="review-head">
         <div class="reviewer">James W.<span>Google review · 12 minutes ago</span></div>
-        <div class="new-badge">NEW REVIEW</div>
+        <div class="new-badge">New Review</div>
       </div>
       <div class="review-stars">★★★★★</div>
       <p class="review-text">"Fast, honest work. They found the electrical issue two other shops missed and had me back on the road the same day."</p>
@@ -193,7 +196,7 @@
         <div class="per">Per location, with contracts and add-on fees.</div>
       </div>
     </div>
-    <div class="guarantee">30 more Google reviews in 60 days, <span>or you don't pay.</span></div>
+    <div class="guarantee">30 more Google reviews in 60 days, or you don't pay.</div>
     <p class="fineprint">Founding shops lock in $49/month for life.</p>
   </section>
 
