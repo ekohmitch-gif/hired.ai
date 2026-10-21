@@ -24,3 +24,20 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Mobile overflow guard: the app is dark-navy end to end, so paint the
+   canvas navy (no white strip on overscroll) and clip any stray
+   horizontal overflow. `clip` is preferred over `hidden` because it
+   does not create a scroll container (position: sticky keeps working);
+   `hidden` is the fallback for older engines. The real layout fixes
+   live in the components — this is a safety net, not the fix. */
+html {
+  background-color: #0b0f17;
+  overflow-x: hidden;
+  overflow-x: clip;
+}
+
+body {
+  overflow-x: hidden;
+  overflow-x: clip;
+}

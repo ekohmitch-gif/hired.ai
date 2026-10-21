@@ -599,22 +599,23 @@ export default function Home() {
   const pt = previewThemes[selectedTemplate];
 
   return (
-    <main className="min-h-screen bg-[#0B0F17] text-slate-100 font-sans p-6">
+    <main className="min-h-screen bg-[#0B0F17] text-slate-100 font-sans p-4 sm:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
 
-        {/* Top Header Navigation */}
-        <header className="flex justify-between items-center border-b border-slate-800 pb-4">
-          <div className="text-2xl font-bold font-serif text-white">
+        {/* Top Header Navigation — wraps to a second row on phones
+            instead of overflowing the viewport (Oct 21 mobile bug) */}
+        <header className="flex flex-wrap justify-between items-center gap-x-3 gap-y-3 border-b border-slate-800 pb-4">
+          <div className="text-xl sm:text-2xl font-bold font-serif text-white shrink-0">
             Enhancerez<span className="text-amber-400">.com</span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0">
             {isSignedIn && (
               isSubscribed ? (
-                <span className="text-xs font-mono text-emerald-400 border border-emerald-800/50 bg-emerald-950/40 px-3 py-1 rounded-full">
+                <span className="text-xs font-mono text-emerald-400 border border-emerald-800/50 bg-emerald-950/40 px-3 py-1 rounded-full whitespace-nowrap">
                   ∞ Unlimited Downloads
                 </span>
               ) : (
-                <span className="text-xs font-mono text-amber-400 border border-slate-800 bg-slate-900 px-3 py-1 rounded-full flex items-center gap-1.5">
+                <span className="text-xs font-mono text-amber-400 border border-slate-800 bg-slate-900 px-3 py-1 rounded-full flex items-center gap-1.5 whitespace-nowrap">
                   <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
                   {rezPoints} downloads left this week
                 </span>
@@ -622,13 +623,13 @@ export default function Home() {
             )}
             <button
               onClick={handleToggleTrackerPanel}
-              className="text-xs font-semibold px-3.5 py-1.5 rounded-lg border border-slate-800 text-slate-300 hover:bg-slate-800 transition"
+              className="text-xs font-semibold px-3.5 py-1.5 rounded-lg border border-slate-800 text-slate-300 hover:bg-slate-800 transition whitespace-nowrap"
             >
               Job Tracker
             </button>
             <button
               onClick={handleToggleSavedPanel}
-              className="text-xs font-semibold px-3.5 py-1.5 rounded-lg border border-slate-800 text-slate-300 hover:bg-slate-800 transition"
+              className="text-xs font-semibold px-3.5 py-1.5 rounded-lg border border-slate-800 text-slate-300 hover:bg-slate-800 transition whitespace-nowrap"
             >
               My Resumes
             </button>
@@ -636,13 +637,21 @@ export default function Home() {
               <button
                 onClick={handleStripeCheckout}
                 disabled={checkoutLoading}
-                className="bg-amber-400 text-slate-950 font-semibold px-3.5 py-1.5 rounded-lg text-xs hover:bg-amber-300 transition shadow"
+                className="bg-amber-400 text-slate-950 font-semibold px-3.5 py-1.5 rounded-lg text-xs hover:bg-amber-300 transition shadow whitespace-nowrap"
               >
                 Get 7 days free
               </button>
             )}
             <ClerkLoaded>
-              {!isSignedIn ? <SignInButton mode="modal" /> : <UserButton />}
+              {!isSignedIn ? (
+                <SignInButton mode="modal">
+                  <button className="text-xs font-semibold px-3.5 py-1.5 rounded-lg text-slate-200 hover:bg-slate-800 transition whitespace-nowrap">
+                    Sign in
+                  </button>
+                </SignInButton>
+              ) : (
+                <UserButton />
+              )}
             </ClerkLoaded>
           </div>
         </header>
@@ -677,18 +686,98 @@ export default function Home() {
           </div>
         )}
 
-        {/* Welcome Section */}
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold text-white tracking-tight">
-            Tailor Your Resume &amp; Get Hired Faster
-          </h1>
-          <p className="text-xl font-semibold text-white">
-            Welcome, {isSignedIn && user?.firstName ? user.firstName : 'there'}!
-          </p>
-          <p className="text-xs text-slate-400">
-            Drop in your resume and a job description to get your Match Rate in about 30 seconds. Free to build and preview — sign in when you&apos;re ready to download.
-          </p>
-        </div>
+        {/* Hero — warmer welcome, the 3-step path up front, and a
+            clearly-labeled sample of what a scan returns */}
+        <section className="relative overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-b from-slate-900/80 to-slate-950/40 px-5 py-7 sm:px-8 sm:py-10">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -top-24 -right-24 w-72 h-72 rounded-full bg-amber-400/10 blur-3xl"
+          />
+          <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-7 space-y-4">
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-amber-300 border border-amber-400/30 bg-amber-400/10 px-2.5 py-1 rounded-full">
+                Free scan · No account needed
+              </span>
+              <h1 className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight leading-[1.05]">
+                Tailor Your Resume &amp; <span className="text-amber-400">Get Hired Faster</span>
+              </h1>
+              <p className="text-base sm:text-lg font-medium text-slate-200">
+                {isSignedIn && user?.firstName
+                  ? `Welcome back, ${user.firstName}. Found a job worth chasing? Let's make your resume speak its language.`
+                  : 'Found a job you actually want? Let\'s make your resume speak its language.'}
+              </p>
+              <p className="text-sm text-slate-400 leading-relaxed max-w-xl">
+                Drop in your resume and the job description, and in about 30 seconds you&apos;ll
+                see your Match Rate — plus exactly which skills the posting is looking for.
+                Free to build and preview; sign in only when you&apos;re ready to download.
+              </p>
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                {['Upload your resume', 'Paste the job post', 'See your Match Rate'].map((step, i) => (
+                  <span key={step} className="inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-300">
+                    <span className="w-5 h-5 rounded-full bg-amber-400/20 text-amber-400 text-[11px] font-bold flex items-center justify-center">
+                      {i + 1}
+                    </span>
+                    {step}
+                    {i < 2 && <span className="text-slate-600 ml-1">→</span>}
+                  </span>
+                ))}
+              </div>
+              <div className="pt-2">
+                <a
+                  href="#scan-tool"
+                  className="inline-block bg-amber-400 text-slate-950 font-bold px-6 py-3 rounded-lg text-sm uppercase hover:bg-amber-300 transition shadow-lg shadow-amber-400/10"
+                >
+                  Scan my resume — free
+                </a>
+              </div>
+            </div>
+
+            {/* Sample scan card — illustrative example output only,
+                labeled as such; not a testimonial or a real result */}
+            <div className="lg:col-span-5">
+              <div className="rounded-xl border border-slate-700/80 bg-slate-950/80 p-4 space-y-3 shadow-2xl shadow-black/40 rotate-0 lg:rotate-1">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div>
+                    <p className="text-sm font-semibold text-white">ATS Optimization Match</p>
+                    <p className="text-[11px] text-slate-400">IT Support Specialist — sample job post</p>
+                  </div>
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-300 border border-amber-400/40 bg-amber-400/10 px-2 py-0.5 rounded-full">
+                    Sample
+                  </span>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-xs text-slate-400 uppercase font-mono">Match Rate</span>
+                    <span className="text-2xl font-bold font-mono text-emerald-400">87%</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-slate-800 overflow-hidden">
+                    <div className="h-full w-[87%] rounded-full bg-gradient-to-r from-amber-400 to-emerald-400" />
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  <span className="px-2 py-0.5 rounded text-[11px] bg-emerald-950/80 text-emerald-300 border border-emerald-800/60">✓ Troubleshooting</span>
+                  <span className="px-2 py-0.5 rounded text-[11px] bg-emerald-950/80 text-emerald-300 border border-emerald-800/60">✓ Active Directory</span>
+                  <span className="px-2 py-0.5 rounded text-[11px] bg-emerald-950/80 text-emerald-300 border border-emerald-800/60">✓ Ticketing Systems</span>
+                  <span className="px-2 py-0.5 rounded text-[11px] bg-rose-950/80 text-rose-300 border border-rose-800/60">✕ ITIL</span>
+                  <span className="px-2 py-0.5 rounded text-[11px] bg-rose-950/80 text-rose-300 border border-rose-800/60">✕ Azure</span>
+                </div>
+                <div className="border-t border-slate-800 pt-3 space-y-1.5 text-[11px] leading-relaxed">
+                  <p className="text-slate-500">
+                    <span className="font-semibold uppercase tracking-wider">Before · </span>
+                    “Helped customers with computer problems.”
+                  </p>
+                  <p className="text-slate-300">
+                    <span className="font-semibold uppercase tracking-wider text-amber-400">After · </span>
+                    “Resolved support tickets across Windows and Microsoft 365, documenting each fix so the same issues stopped coming back.”
+                  </p>
+                </div>
+              </div>
+              <p className="text-[11px] text-slate-500 text-center mt-2.5">
+                An example of what your scan returns — run yours below, free.
+              </p>
+            </div>
+          </div>
+        </section>
 
         {/* Navigation Tabs */}
         <div className="flex gap-2 border-b border-slate-800 pb-3">
@@ -710,8 +799,8 @@ export default function Home() {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div className="lg:col-span-5 space-y-4 bg-slate-900/40 p-5 rounded-xl border border-slate-800">
+        <div id="scan-tool" className="grid grid-cols-1 lg:grid-cols-12 gap-6 scroll-mt-6">
+          <div className="lg:col-span-5 space-y-4 bg-slate-900/40 p-4 sm:p-5 rounded-xl border border-slate-800 min-w-0">
             {activeTab === 'match' ? (
               <div className="space-y-4">
                 {/* Step 1: Resume Upload */}
@@ -749,13 +838,23 @@ export default function Home() {
                   />
                 </div>
 
-                <button
-                  onClick={handleGenerateMatch}
-                  disabled={loading || parsing}
-                  className="w-full bg-amber-400 text-slate-950 font-bold py-3 rounded-lg text-xs uppercase hover:bg-amber-300 transition shadow-lg shadow-amber-400/10 flex items-center justify-center gap-2"
-                >
-                  {loading ? 'Analyzing...' : 'Scan Resume — Free'}
-                </button>
+                {/* Step 3: Run the scan */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="w-5 h-5 rounded-full bg-amber-400/20 text-amber-400 text-[11px] font-bold flex items-center justify-center">3</span>
+                    <label className="text-xs uppercase text-slate-300 font-semibold">See your Match Rate</label>
+                  </div>
+                  <button
+                    onClick={handleGenerateMatch}
+                    disabled={loading || parsing}
+                    className="w-full bg-amber-400 text-slate-950 font-bold py-3.5 rounded-lg text-sm uppercase hover:bg-amber-300 transition shadow-lg shadow-amber-400/20 flex items-center justify-center gap-2"
+                  >
+                    {loading ? 'Analyzing...' : 'Scan Resume — Free'}
+                  </button>
+                  <p className="text-[11px] text-slate-500 text-center">
+                    Takes about 30 seconds. No account needed to scan.
+                  </p>
+                </div>
 
                 {/* Cover Letter Generator */}
                 <div className="space-y-2 border border-slate-800 p-3.5 rounded-xl bg-slate-950/50">
@@ -821,14 +920,14 @@ export default function Home() {
                   <input
                     type="email"
                     placeholder="Email"
-                    className="p-2 bg-slate-950 border border-slate-800 rounded text-xs text-white outline-none"
+                    className="w-full min-w-0 p-2 bg-slate-950 border border-slate-800 rounded text-xs text-white outline-none"
                     value={buildForm.email}
                     onChange={(e) => setBuildForm({ ...buildForm, email: e.target.value })}
                   />
                   <input
                     type="text"
                     placeholder="Phone"
-                    className="p-2 bg-slate-950 border border-slate-800 rounded text-xs text-white outline-none"
+                    className="w-full min-w-0 p-2 bg-slate-950 border border-slate-800 rounded text-xs text-white outline-none"
                     value={buildForm.phone}
                     onChange={(e) => setBuildForm({ ...buildForm, phone: e.target.value })}
                   />
@@ -837,14 +936,14 @@ export default function Home() {
                   <input
                     type="text"
                     placeholder="Location"
-                    className="p-2 bg-slate-950 border border-slate-800 rounded text-xs text-white outline-none"
+                    className="w-full min-w-0 p-2 bg-slate-950 border border-slate-800 rounded text-xs text-white outline-none"
                     value={buildForm.location}
                     onChange={(e) => setBuildForm({ ...buildForm, location: e.target.value })}
                   />
                   <input
                     type="text"
                     placeholder="LinkedIn"
-                    className="p-2 bg-slate-950 border border-slate-800 rounded text-xs text-white outline-none"
+                    className="w-full min-w-0 p-2 bg-slate-950 border border-slate-800 rounded text-xs text-white outline-none"
                     value={buildForm.linkedin}
                     onChange={(e) => setBuildForm({ ...buildForm, linkedin: e.target.value })}
                   />
@@ -898,14 +997,14 @@ export default function Home() {
                         <input
                           type="text"
                           placeholder="Company"
-                          className="p-1.5 bg-slate-900 border border-slate-800 rounded text-xs text-white outline-none"
+                          className="w-full min-w-0 p-1.5 bg-slate-900 border border-slate-800 rounded text-xs text-white outline-none"
                           value={exp.company}
                           onChange={(e) => handleExperienceChange(expIndex, 'company', e.target.value)}
                         />
                         <input
                           type="text"
                           placeholder="Dates"
-                          className="p-1.5 bg-slate-900 border border-slate-800 rounded text-xs text-white outline-none"
+                          className="w-full min-w-0 p-1.5 bg-slate-900 border border-slate-800 rounded text-xs text-white outline-none"
                           value={exp.dates}
                           onChange={(e) => handleExperienceChange(expIndex, 'dates', e.target.value)}
                         />
@@ -940,11 +1039,11 @@ export default function Home() {
           </div>
 
           {/* Right Live Preview Panel */}
-          <div className="lg:col-span-7 bg-slate-900/40 p-6 rounded-xl border border-slate-800">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+          <div className="lg:col-span-7 bg-slate-900/40 p-4 sm:p-6 rounded-xl border border-slate-800 min-w-0">
+            <div className="flex flex-wrap justify-between items-center gap-2 border-b border-slate-800 pb-3 mb-4">
               <span className="text-xs uppercase text-slate-400">Live Preview</span>
               {result && (
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <button
                     onClick={handleSaveResume}
                     disabled={saving}
@@ -972,7 +1071,7 @@ export default function Home() {
 
             {/* Template Selector */}
             {result && (
-              <div className="flex items-center gap-2 mb-4">
+              <div className="flex flex-wrap items-center gap-2 mb-4">
                 <span className="text-[11px] text-slate-500 uppercase">Template:</span>
                 {(['classic', 'modern', 'minimal'] as ResumeTemplate[]).map((t) => {
                   const locked = t !== 'classic' && !isSubscribed;
@@ -994,21 +1093,21 @@ export default function Home() {
             )}
 
             {!result ? (
-              <div className="h-40 flex items-center justify-center text-slate-500 text-xs italic">
-                Ready to generate document...
+              <div className="h-40 flex items-center justify-center text-center text-slate-500 text-xs italic px-4">
+                Your tailored resume will appear here — run a free scan and watch this space fill in.
               </div>
             ) : (
               <div className="space-y-6">
                 {/* ATS Optimization Match Box */}
                 {(result.matchScore !== undefined || result.hardSkills || result.softSkills) && (
                   <div className="p-4 bg-slate-950 border border-slate-800 rounded-xl space-y-4">
-                    <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                      <div>
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+                      <div className="min-w-0">
                         <h3 className="text-sm font-semibold text-white">ATS Optimization Match</h3>
                         <p className="text-[11px] text-slate-400">Keyword & Structure Analysis</p>
                       </div>
                       {result.matchScore !== undefined && (
-                        <div className="flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">
+                        <div className="flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800 shrink-0">
                           <span className="text-xs text-slate-400 uppercase font-mono">Match Score:</span>
                           <span className={`text-base font-bold font-mono ${
                             result.matchScore >= 80 ? 'text-emerald-400' : result.matchScore >= 60 ? 'text-amber-400' : 'text-rose-400'
@@ -1083,9 +1182,9 @@ export default function Home() {
 
                 {/* Resume Output Panel — no boxes, plain text separated by bullets */}
                 <div ref={resumeRef} className={`space-y-4 text-xs text-slate-200 ${pt.font}`}>
-                  <div className={`${pt.headerRule} pb-2`}>
-                    <h1 className={pt.name}>{result.fullName}</h1>
-                    <p className={pt.contact}>{result.contactInfo}</p>
+                  <div className={`${pt.headerRule} pb-2 min-w-0`}>
+                    <h1 className={`${pt.name} break-words`}>{result.fullName}</h1>
+                    <p className={`${pt.contact} break-words`}>{result.contactInfo}</p>
                   </div>
 
                   <div className="space-y-1">
@@ -1133,9 +1232,9 @@ export default function Home() {
                       <h4 className={pt.sectionTitle}>Professional Experience</h4>
                       {result.experience.map((exp: any, expIdx: number) => (
                         <div key={expIdx} className="space-y-1">
-                          <div className="flex justify-between items-baseline font-bold text-slate-100">
-                            <span>{exp.role} {exp.company && `— ${exp.company}`}</span>
-                            <span className="font-mono text-[11px] text-slate-400">{exp.dates}</span>
+                          <div className="flex flex-wrap justify-between items-baseline gap-x-3 font-bold text-slate-100">
+                            <span className="min-w-0 break-words">{exp.role} {exp.company && `— ${exp.company}`}</span>
+                            <span className="font-mono text-[11px] text-slate-400 shrink-0">{exp.dates}</span>
                           </div>
                           <ul className="list-disc list-inside space-y-1 pl-1 text-slate-300">
                             {exp.bullets?.map((bullet: string, bIdx: number) => (
@@ -1169,9 +1268,9 @@ export default function Home() {
                     <div className="space-y-1">
                       <h4 className={pt.sectionTitle}>Education</h4>
                       {result.education.map((edu: any, eIdx: number) => (
-                        <div key={eIdx} className="flex justify-between items-baseline text-slate-200">
-                          <span className="font-bold">{edu.degree} — {edu.institution}</span>
-                          <span className="font-mono text-[11px] text-slate-400">{edu.dates}</span>
+                        <div key={eIdx} className="flex flex-wrap justify-between items-baseline gap-x-3 text-slate-200">
+                          <span className="font-bold min-w-0 break-words">{edu.degree} — {edu.institution}</span>
+                          <span className="font-mono text-[11px] text-slate-400 shrink-0">{edu.dates}</span>
                         </div>
                       ))}
                     </div>
@@ -1225,14 +1324,14 @@ export default function Home() {
                     <input
                       type="text"
                       placeholder="Company"
-                      className="p-2 bg-slate-900 border border-slate-800 rounded text-xs text-white outline-none"
+                      className="w-full min-w-0 p-2 bg-slate-900 border border-slate-800 rounded text-xs text-white outline-none"
                       value={newApp.company}
                       onChange={(e) => setNewApp({ ...newApp, company: e.target.value })}
                     />
                     <input
                       type="text"
                       placeholder="Job Link"
-                      className="p-2 bg-slate-900 border border-slate-800 rounded text-xs text-white outline-none"
+                      className="w-full min-w-0 p-2 bg-slate-900 border border-slate-800 rounded text-xs text-white outline-none"
                       value={newApp.jobLink}
                       onChange={(e) => setNewApp({ ...newApp, jobLink: e.target.value })}
                     />
