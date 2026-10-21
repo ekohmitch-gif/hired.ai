@@ -32,28 +32,28 @@ const previewThemes: Record<
 > = {
   classic: {
     font: 'font-serif',
-    name: 'text-xl font-bold text-white text-center',
-    contact: 'text-xs font-mono text-slate-400 text-center',
+    name: 'text-xl font-bold text-slate-900 text-center',
+    contact: 'text-xs font-mono text-slate-500 text-center',
     headerRule: 'border-b border-amber-500/40',
-    sectionTitle: 'font-bold text-amber-300 uppercase text-xs',
+    sectionTitle: 'font-bold text-amber-600 uppercase text-xs',
     skillsAlign: 'text-center',
     skillChips: false,
   },
   modern: {
     font: 'font-sans',
-    name: 'text-2xl font-extrabold text-white tracking-tight text-left',
-    contact: 'text-xs font-mono text-amber-400 text-left',
-    headerRule: 'border-b border-slate-700',
-    sectionTitle: 'font-bold text-white uppercase text-xs border-b-2 border-amber-400/70 pb-1',
+    name: 'text-2xl font-extrabold text-slate-900 tracking-tight text-left',
+    contact: 'text-xs font-mono text-amber-600 text-left',
+    headerRule: 'border-b border-slate-300',
+    sectionTitle: 'font-bold text-slate-900 uppercase text-xs border-b-2 border-amber-400 pb-1',
     skillsAlign: 'text-left',
     skillChips: true,
   },
   minimal: {
     font: 'font-sans font-light',
-    name: 'text-xl font-normal text-slate-100 text-left',
+    name: 'text-xl font-normal text-slate-800 text-left',
     contact: 'text-xs font-mono text-slate-500 text-left',
-    headerRule: 'border-b border-slate-800',
-    sectionTitle: 'font-semibold text-slate-400 uppercase text-[11px] tracking-[0.25em]',
+    headerRule: 'border-b border-slate-200',
+    sectionTitle: 'font-semibold text-slate-500 uppercase text-[11px] tracking-[0.25em]',
     skillsAlign: 'text-left',
     skillChips: false,
   },
@@ -599,22 +599,23 @@ export default function Home() {
   const pt = previewThemes[selectedTemplate];
 
   return (
-    <main className="min-h-screen bg-[#0B0F17] text-slate-100 font-sans p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <main className="min-h-screen bg-[#FAFAF9] text-slate-800 font-sans antialiased px-4 py-6 sm:px-6 sm:py-10">
+      <div className="max-w-7xl mx-auto space-y-8 sm:space-y-12">
 
-        {/* Top Header Navigation */}
-        <header className="flex justify-between items-center border-b border-slate-800 pb-4">
-          <div className="text-2xl font-bold font-serif text-white">
-            Enhancerez<span className="text-amber-400">.com</span>
+        {/* Top Header Navigation — wraps to a second row on phones
+            instead of overflowing the viewport (Oct 21 mobile bug) */}
+        <header className="flex flex-wrap justify-between items-center gap-x-3 gap-y-3 border-b border-slate-200 pb-4">
+          <div className="text-xl sm:text-2xl font-bold font-serif text-slate-900 shrink-0">
+            Enhancerez<span className="text-amber-600">.com</span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0">
             {isSignedIn && (
               isSubscribed ? (
-                <span className="text-xs font-mono text-emerald-400 border border-emerald-800/50 bg-emerald-950/40 px-3 py-1 rounded-full">
+                <span className="text-xs font-mono text-emerald-600 border border-emerald-200 bg-emerald-50 px-3 py-1 rounded-full whitespace-nowrap">
                   ∞ Unlimited Downloads
                 </span>
               ) : (
-                <span className="text-xs font-mono text-amber-400 border border-slate-800 bg-slate-900 px-3 py-1 rounded-full flex items-center gap-1.5">
+                <span className="text-xs font-mono text-amber-600 border border-slate-200 bg-white px-3 py-1 rounded-full flex items-center gap-1.5 whitespace-nowrap">
                   <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
                   {rezPoints} downloads left this week
                 </span>
@@ -622,13 +623,13 @@ export default function Home() {
             )}
             <button
               onClick={handleToggleTrackerPanel}
-              className="text-xs font-semibold px-3.5 py-1.5 rounded-lg border border-slate-800 text-slate-300 hover:bg-slate-800 transition"
+              className="text-xs font-semibold px-3.5 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 transition whitespace-nowrap"
             >
               Job Tracker
             </button>
             <button
               onClick={handleToggleSavedPanel}
-              className="text-xs font-semibold px-3.5 py-1.5 rounded-lg border border-slate-800 text-slate-300 hover:bg-slate-800 transition"
+              className="text-xs font-semibold px-3.5 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 transition whitespace-nowrap"
             >
               My Resumes
             </button>
@@ -636,13 +637,21 @@ export default function Home() {
               <button
                 onClick={handleStripeCheckout}
                 disabled={checkoutLoading}
-                className="bg-amber-400 text-slate-950 font-semibold px-3.5 py-1.5 rounded-lg text-xs hover:bg-amber-300 transition shadow"
+                className="bg-amber-400 text-slate-950 font-semibold px-3.5 py-1.5 rounded-lg text-xs hover:bg-amber-300 transition shadow whitespace-nowrap"
               >
                 Get 7 days free
               </button>
             )}
             <ClerkLoaded>
-              {!isSignedIn ? <SignInButton mode="modal" /> : <UserButton />}
+              {!isSignedIn ? (
+                <SignInButton mode="modal">
+                  <button className="text-xs font-semibold px-3.5 py-1.5 rounded-lg text-slate-700 hover:bg-slate-100 transition whitespace-nowrap">
+                    Sign in
+                  </button>
+                </SignInButton>
+              ) : (
+                <UserButton />
+              )}
             </ClerkLoaded>
           </div>
         </header>
@@ -652,24 +661,24 @@ export default function Home() {
           <div
             className={`flex items-start justify-between gap-3 rounded-xl border px-4 py-3 text-xs ${
               checkoutNotice === 'success'
-                ? 'border-emerald-800/60 bg-emerald-950/40 text-emerald-200'
-                : 'border-slate-700 bg-slate-900 text-slate-300'
+                ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                : 'border-slate-300 bg-white text-slate-600'
             }`}
           >
             <p className="leading-relaxed">
               {checkoutNotice === 'success' ? (
                 <>
-                  🎉 <span className="font-semibold text-white">You&apos;re Pro!</span> Your
+                  🎉 <span className="font-semibold text-slate-900">You&apos;re Pro!</span> Your
                   subscription is active and unlimited downloads are unlocked. If Pro status
                   doesn&apos;t appear within a few seconds, refresh the page.
                 </>
               ) : (
-                <>Checkout was canceled — no charge was made. You can upgrade anytime.</>
+                <>Checkout was canceled. No charge was made. You can upgrade anytime.</>
               )}
             </p>
             <button
               onClick={() => setCheckoutNotice(null)}
-              className="shrink-0 text-slate-400 hover:text-white"
+              className="shrink-0 text-slate-500 hover:text-slate-900"
               aria-label="Dismiss"
             >
               ✕
@@ -677,25 +686,109 @@ export default function Home() {
           </div>
         )}
 
-        {/* Welcome Section */}
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold text-white tracking-tight">
-            Tailor Your Resume &amp; Get Hired Faster
-          </h1>
-          <p className="text-xl font-semibold text-white">
-            Welcome, {isSignedIn && user?.firstName ? user.firstName : 'there'}!
-          </p>
-          <p className="text-xs text-slate-400">
-            Drop in your resume and a job description to get your Match Rate in about 30 seconds. Free to build and preview — sign in when you&apos;re ready to download.
-          </p>
-        </div>
+        {/* Hero — warmer welcome, the 3-step path up front, and a
+            clearly-labeled sample of what a scan returns */}
+        <section className="relative overflow-hidden px-1 pt-4 pb-2 sm:px-2 sm:pt-10 sm:pb-4">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -top-32 -right-32 w-96 h-96 rounded-full bg-amber-200/30 blur-3xl"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -bottom-40 -left-32 w-96 h-96 rounded-full bg-amber-100/40 blur-3xl"
+          />
+          <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+            <div className="lg:col-span-7 space-y-5">
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-amber-700 border border-amber-200 bg-amber-50 px-3 py-1 rounded-full">
+                Free scan · No account needed
+              </span>
+              <h1 className="text-4xl sm:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.05]">
+                Tailor Your Resume &amp; <span className="text-amber-500">Get Hired Faster</span>
+              </h1>
+              <p className="text-base sm:text-lg font-medium text-slate-700">
+                {isSignedIn && user?.firstName
+                  ? `Welcome back, ${user.firstName}. Found a job worth chasing? Let's make your resume speak its language.`
+                  : 'Found a job you actually want? Let\'s make your resume speak its language.'}
+              </p>
+              <p className="text-sm sm:text-base text-slate-500 leading-relaxed max-w-xl">
+                Drop in your resume and the job description, and in about 30 seconds you&apos;ll
+                see your Match Rate, plus exactly which skills the posting is looking for.
+                Free to build and preview. Sign in only when you&apos;re ready to download.
+              </p>
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                {['Upload your resume', 'Paste the job post', 'See your Match Rate'].map((step, i) => (
+                  <span key={step} className="inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-600">
+                    <span className="w-5 h-5 rounded-full bg-amber-100 text-amber-600 text-[11px] font-bold flex items-center justify-center">
+                      {i + 1}
+                    </span>
+                    {step}
+                    {i < 2 && <span className="text-slate-600 ml-1">→</span>}
+                  </span>
+                ))}
+              </div>
+              <div className="pt-2">
+                <a
+                  href="#scan-tool"
+                  className="inline-block bg-amber-400 text-slate-950 font-bold px-7 py-3.5 rounded-full text-sm uppercase hover:bg-amber-300 transition shadow-lg shadow-amber-200/60"
+                >
+                  Scan my resume for free
+                </a>
+              </div>
+            </div>
+
+            {/* Sample scan card — illustrative example output only,
+                labeled as such; not a testimonial or a real result */}
+            <div className="lg:col-span-5">
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4 shadow-xl shadow-slate-200/70 rotate-0 lg:rotate-1">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">ATS Optimization Match</p>
+                    <p className="text-[11px] text-slate-500">IT Support Specialist, sample job post</p>
+                  </div>
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-600 border border-amber-300 bg-amber-50 px-2 py-0.5 rounded-full">
+                    Sample
+                  </span>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-xs text-slate-500 uppercase font-mono">Match Rate</span>
+                    <span className="text-2xl font-bold font-mono text-emerald-600">87%</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                    <div className="h-full w-[87%] rounded-full bg-gradient-to-r from-amber-400 to-emerald-500" />
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  <span className="px-2 py-0.5 rounded text-[11px] bg-emerald-50 text-emerald-700 border border-emerald-200">✓ Troubleshooting</span>
+                  <span className="px-2 py-0.5 rounded text-[11px] bg-emerald-50 text-emerald-700 border border-emerald-200">✓ Active Directory</span>
+                  <span className="px-2 py-0.5 rounded text-[11px] bg-emerald-50 text-emerald-700 border border-emerald-200">✓ Ticketing Systems</span>
+                  <span className="px-2 py-0.5 rounded text-[11px] bg-rose-50 text-rose-700 border border-rose-200">✕ ITIL</span>
+                  <span className="px-2 py-0.5 rounded text-[11px] bg-rose-50 text-rose-700 border border-rose-200">✕ Azure</span>
+                </div>
+                <div className="border-t border-slate-200 pt-3 space-y-1.5 text-[11px] leading-relaxed">
+                  <p className="text-slate-500">
+                    <span className="font-semibold uppercase tracking-wider">Before · </span>
+                    “Helped customers with computer problems.”
+                  </p>
+                  <p className="text-slate-600">
+                    <span className="font-semibold uppercase tracking-wider text-amber-600">After · </span>
+                    “Resolved support tickets across Windows and Microsoft 365, documenting each fix so the same issues stopped coming back.”
+                  </p>
+                </div>
+              </div>
+              <p className="text-[11px] text-slate-500 text-center mt-3">
+                An example of what your scan returns. Run yours below, free.
+              </p>
+            </div>
+          </div>
+        </section>
 
         {/* Navigation Tabs */}
-        <div className="flex gap-2 border-b border-slate-800 pb-3">
+        <div className="flex gap-2 border-b border-slate-200 pb-3">
           <button
             onClick={() => setActiveTab('match')}
             className={`text-xs uppercase px-3.5 py-1.5 rounded-lg transition font-medium ${
-              activeTab === 'match' ? 'bg-slate-800 text-amber-400 border border-amber-400/30' : 'text-slate-400 hover:text-slate-200'
+              activeTab === 'match' ? 'bg-slate-100 text-amber-600 border border-amber-300' : 'text-slate-500 hover:text-slate-700'
             }`}
           >
             New Scan
@@ -703,32 +796,32 @@ export default function Home() {
           <button
             onClick={() => setActiveTab('build')}
             className={`text-xs uppercase px-3.5 py-1.5 rounded-lg transition font-medium ${
-              activeTab === 'build' ? 'bg-slate-800 text-amber-400 border border-amber-400/30' : 'text-slate-400 hover:text-slate-200'
+              activeTab === 'build' ? 'bg-slate-100 text-amber-600 border border-amber-300' : 'text-slate-500 hover:text-slate-700'
             }`}
           >
             Live Builder
           </button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div className="lg:col-span-5 space-y-4 bg-slate-900/40 p-5 rounded-xl border border-slate-800">
+        <div id="scan-tool" className="grid grid-cols-1 lg:grid-cols-12 gap-6 scroll-mt-6">
+          <div className="lg:col-span-5 space-y-4 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm min-w-0">
             {activeTab === 'match' ? (
               <div className="space-y-4">
                 {/* Step 1: Resume Upload */}
-                <div className="space-y-2 border border-slate-800 p-3.5 rounded-xl bg-slate-950/50">
+                <div className="space-y-2 border border-slate-200 p-3.5 rounded-xl bg-slate-50">
                   <div className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-amber-400/20 text-amber-400 text-[11px] font-bold flex items-center justify-center">1</span>
-                    <label className="text-xs uppercase text-slate-300 font-semibold">Upload a resume</label>
+                    <span className="w-5 h-5 rounded-full bg-amber-100 text-amber-600 text-[11px] font-bold flex items-center justify-center">1</span>
+                    <label className="text-xs uppercase text-slate-600 font-semibold">Upload a resume</label>
                   </div>
                   <input
                     key={fileKey}
                     type="file"
                     accept=".pdf,.docx"
                     onChange={handleFileUpload}
-                    className="w-full text-xs text-slate-400 bg-slate-900 p-2 rounded-lg border border-slate-800"
+                    className="w-full text-xs text-slate-500 bg-white p-2 rounded-lg border border-slate-200"
                   />
                   <textarea
-                    className="w-full h-20 p-2 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-300 font-mono resize-none outline-none focus:border-amber-400/50"
+                    className="w-full h-20 p-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-600 font-mono resize-none outline-none focus:border-amber-400/50"
                     placeholder="Or paste resume text here..."
                     value={resumeText}
                     onChange={(e) => setResumeText(e.target.value)}
@@ -736,35 +829,45 @@ export default function Home() {
                 </div>
 
                 {/* Step 2: Job Description */}
-                <div className="space-y-2 border border-slate-800 p-3.5 rounded-xl bg-slate-950/50">
+                <div className="space-y-2 border border-slate-200 p-3.5 rounded-xl bg-slate-50">
                   <div className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-amber-400/20 text-amber-400 text-[11px] font-bold flex items-center justify-center">2</span>
-                    <label className="text-xs uppercase text-slate-300 font-semibold">Paste a job description</label>
+                    <span className="w-5 h-5 rounded-full bg-amber-100 text-amber-600 text-[11px] font-bold flex items-center justify-center">2</span>
+                    <label className="text-xs uppercase text-slate-600 font-semibold">Paste a job description</label>
                   </div>
                   <textarea
-                    className="w-full h-28 p-2 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-300 font-mono resize-none outline-none focus:border-amber-400/50"
+                    className="w-full h-28 p-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-600 font-mono resize-none outline-none focus:border-amber-400/50"
                     placeholder="Copy and paste job description here. Aim to exclude Benefits, Perks, and Legal Disclaimers."
                     value={jobDescription}
                     onChange={(e) => setJobDescription(e.target.value)}
                   />
                 </div>
 
-                <button
-                  onClick={handleGenerateMatch}
-                  disabled={loading || parsing}
-                  className="w-full bg-amber-400 text-slate-950 font-bold py-3 rounded-lg text-xs uppercase hover:bg-amber-300 transition shadow-lg shadow-amber-400/10 flex items-center justify-center gap-2"
-                >
-                  {loading ? 'Analyzing...' : 'Scan Resume — Free'}
-                </button>
+                {/* Step 3: Run the scan */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="w-5 h-5 rounded-full bg-amber-100 text-amber-600 text-[11px] font-bold flex items-center justify-center">3</span>
+                    <label className="text-xs uppercase text-slate-600 font-semibold">See your Match Rate</label>
+                  </div>
+                  <button
+                    onClick={handleGenerateMatch}
+                    disabled={loading || parsing}
+                    className="w-full bg-amber-400 text-slate-950 font-bold py-3.5 rounded-full text-sm uppercase hover:bg-amber-300 transition shadow-lg shadow-amber-200/60 flex items-center justify-center gap-2"
+                  >
+                    {loading ? 'Analyzing...' : 'Scan Resume for Free'}
+                  </button>
+                  <p className="text-[11px] text-slate-500 text-center">
+                    Takes about 30 seconds. No account needed to scan.
+                  </p>
+                </div>
 
                 {/* Cover Letter Generator */}
-                <div className="space-y-2 border border-slate-800 p-3.5 rounded-xl bg-slate-950/50">
+                <div className="space-y-2 border border-slate-200 p-3.5 rounded-xl bg-slate-50">
                   <div className="flex justify-between items-center">
-                    <label className="text-xs uppercase text-slate-300 font-semibold">Cover Letter</label>
+                    <label className="text-xs uppercase text-slate-600 font-semibold">Cover Letter</label>
                     <button
                       onClick={handleGenerateCoverLetter}
                       disabled={generatingCoverLetter}
-                      className="text-[10px] text-amber-400 hover:underline disabled:opacity-60"
+                      className="text-[10px] text-amber-600 hover:underline disabled:opacity-60"
                     >
                       {generatingCoverLetter ? 'Writing...' : coverLetter ? '↻ Regenerate' : '✨ Generate'}
                     </button>
@@ -773,7 +876,7 @@ export default function Home() {
                     <>
                       <textarea
                         rows={8}
-                        className="w-full p-2 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-300 resize-none outline-none focus:border-amber-400/50"
+                        className="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-600 resize-none outline-none focus:border-amber-400/50"
                         value={coverLetter}
                         onChange={(e) => setCoverLetter(e.target.value)}
                       />
@@ -788,7 +891,7 @@ export default function Home() {
                         <button
                           onClick={() => handleExportCoverLetter('docx')}
                           disabled={exportingCoverLetter !== null}
-                          className="flex-1 bg-slate-800 text-slate-200 text-xs font-semibold py-1.5 rounded hover:bg-slate-700 transition border border-slate-700 disabled:opacity-60"
+                          className="flex-1 bg-slate-100 text-slate-700 text-xs font-semibold py-1.5 rounded hover:bg-slate-200 transition border border-slate-300 disabled:opacity-60"
                         >
                           {exportingCoverLetter === 'docx' ? 'Preparing...' : isSignedIn ? 'Download DOCX' : 'Sign in to Download'}
                         </button>
@@ -806,14 +909,14 @@ export default function Home() {
                 <input
                   type="text"
                   placeholder="Target Role"
-                  className="w-full p-2 bg-slate-950 border border-slate-800 rounded text-xs text-white outline-none"
+                  className="w-full p-2 bg-slate-50 border border-slate-200 rounded text-xs text-slate-900 outline-none"
                   value={targetRole}
                   onChange={(e) => setTargetRole(e.target.value)}
                 />
                 <input
                   type="text"
                   placeholder="Full Name"
-                  className="w-full p-2 bg-slate-950 border border-slate-800 rounded text-xs text-white outline-none"
+                  className="w-full p-2 bg-slate-50 border border-slate-200 rounded text-xs text-slate-900 outline-none"
                   value={buildForm.fullName}
                   onChange={(e) => setBuildForm({ ...buildForm, fullName: e.target.value })}
                 />
@@ -821,14 +924,14 @@ export default function Home() {
                   <input
                     type="email"
                     placeholder="Email"
-                    className="p-2 bg-slate-950 border border-slate-800 rounded text-xs text-white outline-none"
+                    className="w-full min-w-0 p-2 bg-slate-50 border border-slate-200 rounded text-xs text-slate-900 outline-none"
                     value={buildForm.email}
                     onChange={(e) => setBuildForm({ ...buildForm, email: e.target.value })}
                   />
                   <input
                     type="text"
                     placeholder="Phone"
-                    className="p-2 bg-slate-950 border border-slate-800 rounded text-xs text-white outline-none"
+                    className="w-full min-w-0 p-2 bg-slate-50 border border-slate-200 rounded text-xs text-slate-900 outline-none"
                     value={buildForm.phone}
                     onChange={(e) => setBuildForm({ ...buildForm, phone: e.target.value })}
                   />
@@ -837,29 +940,29 @@ export default function Home() {
                   <input
                     type="text"
                     placeholder="Location"
-                    className="p-2 bg-slate-950 border border-slate-800 rounded text-xs text-white outline-none"
+                    className="w-full min-w-0 p-2 bg-slate-50 border border-slate-200 rounded text-xs text-slate-900 outline-none"
                     value={buildForm.location}
                     onChange={(e) => setBuildForm({ ...buildForm, location: e.target.value })}
                   />
                   <input
                     type="text"
                     placeholder="LinkedIn"
-                    className="p-2 bg-slate-950 border border-slate-800 rounded text-xs text-white outline-none"
+                    className="w-full min-w-0 p-2 bg-slate-50 border border-slate-200 rounded text-xs text-slate-900 outline-none"
                     value={buildForm.linkedin}
                     onChange={(e) => setBuildForm({ ...buildForm, linkedin: e.target.value })}
                   />
                 </div>
                 <div className="space-y-1">
                   <div className="flex justify-between items-center">
-                    <label className="text-[11px] text-slate-400">Professional Summary</label>
-                    <button onClick={handleRefineSummary} disabled={refiningSummary} className="text-[10px] text-amber-400 hover:underline">
+                    <label className="text-[11px] text-slate-500">Professional Summary</label>
+                    <button onClick={handleRefineSummary} disabled={refiningSummary} className="text-[10px] text-amber-600 hover:underline">
                       {refiningSummary ? 'Refining...' : '✨ Refine'}
                     </button>
                   </div>
                   <textarea
                     rows={3}
                     placeholder="Summary..."
-                    className="w-full p-2 bg-slate-950 border border-slate-800 rounded text-xs text-white resize-none outline-none"
+                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded text-xs text-slate-900 resize-none outline-none"
                     value={buildForm.summary}
                     onChange={(e) => {
                       setBuildForm({ ...buildForm, summary: e.target.value });
@@ -868,11 +971,11 @@ export default function Home() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[11px] text-slate-400">Skills (Comma Separated)</label>
+                  <label className="text-[11px] text-slate-500">Skills (Comma Separated)</label>
                   <input
                     type="text"
                     placeholder="Python, Cybersecurity, SIEM"
-                    className="w-full p-2 bg-slate-950 border border-slate-800 rounded text-xs text-white outline-none"
+                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded text-xs text-slate-900 outline-none"
                     value={buildForm.skills}
                     onChange={(e) => setBuildForm({ ...buildForm, skills: e.target.value })}
                   />
@@ -880,17 +983,17 @@ export default function Home() {
 
                 <div className="space-y-3 pt-2">
                   <div className="flex justify-between items-center">
-                    <label className="text-[11px] text-slate-400">Experience</label>
-                    <button onClick={handleAddExperience} className="text-[10px] text-amber-400 hover:underline">
+                    <label className="text-[11px] text-slate-500">Experience</label>
+                    <button onClick={handleAddExperience} className="text-[10px] text-amber-600 hover:underline">
                       + Add Position
                     </button>
                   </div>
                   {buildForm.experience.map((exp, expIndex) => (
-                    <div key={expIndex} className="p-2.5 bg-slate-950/60 border border-slate-800 rounded space-y-2">
+                    <div key={expIndex} className="p-2.5 bg-slate-50 border border-slate-200 rounded space-y-2">
                       <input
                         type="text"
                         placeholder="Job Title"
-                        className="w-full p-1.5 bg-slate-900 border border-slate-800 rounded text-xs text-white outline-none"
+                        className="w-full p-1.5 bg-white border border-slate-200 rounded text-xs text-slate-900 outline-none"
                         value={exp.role}
                         onChange={(e) => handleExperienceChange(expIndex, 'role', e.target.value)}
                       />
@@ -898,14 +1001,14 @@ export default function Home() {
                         <input
                           type="text"
                           placeholder="Company"
-                          className="p-1.5 bg-slate-900 border border-slate-800 rounded text-xs text-white outline-none"
+                          className="w-full min-w-0 p-1.5 bg-white border border-slate-200 rounded text-xs text-slate-900 outline-none"
                           value={exp.company}
                           onChange={(e) => handleExperienceChange(expIndex, 'company', e.target.value)}
                         />
                         <input
                           type="text"
                           placeholder="Dates"
-                          className="p-1.5 bg-slate-900 border border-slate-800 rounded text-xs text-white outline-none"
+                          className="w-full min-w-0 p-1.5 bg-white border border-slate-200 rounded text-xs text-slate-900 outline-none"
                           value={exp.dates}
                           onChange={(e) => handleExperienceChange(expIndex, 'dates', e.target.value)}
                         />
@@ -913,7 +1016,7 @@ export default function Home() {
                       <div className="space-y-1">
                         <div className="flex justify-between items-center">
                           <span className="text-[10px] text-slate-500">Bullets</span>
-                          <button onClick={() => handleAddBullet(expIndex)} className="text-[10px] text-amber-400 hover:underline">
+                          <button onClick={() => handleAddBullet(expIndex)} className="text-[10px] text-amber-600 hover:underline">
                             + Bullet
                           </button>
                         </div>
@@ -922,7 +1025,7 @@ export default function Home() {
                             key={bulletIndex}
                             type="text"
                             placeholder="Bullet point..."
-                            className="w-full p-1.5 bg-slate-900 border border-slate-800 rounded text-xs text-white outline-none"
+                            className="w-full p-1.5 bg-white border border-slate-200 rounded text-xs text-slate-900 outline-none"
                             value={bullet}
                             onChange={(e) => handleBulletChange(expIndex, bulletIndex, e.target.value)}
                           />
@@ -940,15 +1043,15 @@ export default function Home() {
           </div>
 
           {/* Right Live Preview Panel */}
-          <div className="lg:col-span-7 bg-slate-900/40 p-6 rounded-xl border border-slate-800">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
-              <span className="text-xs uppercase text-slate-400">Live Preview</span>
+          <div className="lg:col-span-7 bg-white p-5 sm:p-7 rounded-2xl border border-slate-200 shadow-sm min-w-0">
+            <div className="flex flex-wrap justify-between items-center gap-2 border-b border-slate-200 pb-3 mb-4">
+              <span className="text-xs uppercase text-slate-500">Live Preview</span>
               {result && (
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <button
                     onClick={handleSaveResume}
                     disabled={saving}
-                    className="bg-slate-800 text-slate-200 text-xs font-semibold px-3 py-1 rounded hover:bg-slate-700 transition border border-slate-700 disabled:opacity-60"
+                    className="bg-slate-100 text-slate-700 text-xs font-semibold px-3 py-1 rounded hover:bg-slate-200 transition border border-slate-300 disabled:opacity-60"
                   >
                     {saving ? 'Saving...' : '💾 Save'}
                   </button>
@@ -962,7 +1065,7 @@ export default function Home() {
                   <button
                     onClick={() => handleExport('docx')}
                     disabled={exportingFormat !== null}
-                    className="bg-slate-800 text-slate-200 text-xs font-semibold px-3 py-1 rounded hover:bg-slate-700 transition border border-slate-700 disabled:opacity-60"
+                    className="bg-slate-100 text-slate-700 text-xs font-semibold px-3 py-1 rounded hover:bg-slate-200 transition border border-slate-300 disabled:opacity-60"
                   >
                     {exportingFormat === 'docx' ? 'Preparing...' : isSignedIn ? 'Download DOCX' : 'Sign in to Download'}
                   </button>
@@ -972,7 +1075,7 @@ export default function Home() {
 
             {/* Template Selector */}
             {result && (
-              <div className="flex items-center gap-2 mb-4">
+              <div className="flex flex-wrap items-center gap-2 mb-4">
                 <span className="text-[11px] text-slate-500 uppercase">Template:</span>
                 {(['classic', 'modern', 'minimal'] as ResumeTemplate[]).map((t) => {
                   const locked = t !== 'classic' && !isSubscribed;
@@ -983,7 +1086,7 @@ export default function Home() {
                       className={`text-[11px] px-2.5 py-1 rounded-full border transition capitalize ${
                         selectedTemplate === t
                           ? 'bg-amber-400 text-slate-950 border-amber-400 font-semibold'
-                          : 'border-slate-700 text-slate-400 hover:text-slate-200'
+                          : 'border-slate-300 text-slate-500 hover:text-slate-700'
                       }`}
                     >
                       {t} {locked && '🔒'}
@@ -994,24 +1097,24 @@ export default function Home() {
             )}
 
             {!result ? (
-              <div className="h-40 flex items-center justify-center text-slate-500 text-xs italic">
-                Ready to generate document...
+              <div className="h-40 flex items-center justify-center text-center text-slate-500 text-xs italic px-4">
+                Your tailored resume will appear here. Run a free scan and watch this space fill in.
               </div>
             ) : (
               <div className="space-y-6">
                 {/* ATS Optimization Match Box */}
                 {(result.matchScore !== undefined || result.hardSkills || result.softSkills) && (
-                  <div className="p-4 bg-slate-950 border border-slate-800 rounded-xl space-y-4">
-                    <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                      <div>
-                        <h3 className="text-sm font-semibold text-white">ATS Optimization Match</h3>
-                        <p className="text-[11px] text-slate-400">Keyword & Structure Analysis</p>
+                  <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
+                      <div className="min-w-0">
+                        <h3 className="text-sm font-semibold text-slate-900">ATS Optimization Match</h3>
+                        <p className="text-[11px] text-slate-500">Keyword & Structure Analysis</p>
                       </div>
                       {result.matchScore !== undefined && (
-                        <div className="flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">
-                          <span className="text-xs text-slate-400 uppercase font-mono">Match Score:</span>
+                        <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shrink-0">
+                          <span className="text-xs text-slate-500 uppercase font-mono">Match Score:</span>
                           <span className={`text-base font-bold font-mono ${
-                            result.matchScore >= 80 ? 'text-emerald-400' : result.matchScore >= 60 ? 'text-amber-400' : 'text-rose-400'
+                            result.matchScore >= 80 ? 'text-emerald-600' : result.matchScore >= 60 ? 'text-amber-600' : 'text-rose-500'
                           }`}>
                             {result.matchScore}%
                           </span>
@@ -1022,15 +1125,15 @@ export default function Home() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {result.hardSkills && (
                         <div className="space-y-2">
-                          <span className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold block">Hard Skills</span>
+                          <span className="text-[11px] uppercase tracking-wider text-slate-500 font-semibold block">Hard Skills</span>
                           <div className="flex flex-wrap gap-1.5">
                             {result.hardSkills.matched?.map((skill: string, idx: number) => (
-                              <span key={idx} className="px-2 py-0.5 rounded text-[11px] bg-emerald-950/80 text-emerald-300 border border-emerald-800/60">
+                              <span key={idx} className="px-2 py-0.5 rounded text-[11px] bg-emerald-50 text-emerald-700 border border-emerald-200">
                                 ✓ {skill}
                               </span>
                             ))}
                             {result.hardSkills.missing?.map((skill: string, idx: number) => (
-                              <span key={idx} className="px-2 py-0.5 rounded text-[11px] bg-rose-950/80 text-rose-300 border border-rose-800/60">
+                              <span key={idx} className="px-2 py-0.5 rounded text-[11px] bg-rose-50 text-rose-700 border border-rose-200">
                                 ✕ {skill}
                               </span>
                             ))}
@@ -1040,15 +1143,15 @@ export default function Home() {
 
                       {result.softSkills && (
                         <div className="space-y-2">
-                          <span className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold block">Soft Skills</span>
+                          <span className="text-[11px] uppercase tracking-wider text-slate-500 font-semibold block">Soft Skills</span>
                           <div className="flex flex-wrap gap-1.5">
                             {result.softSkills.matched?.map((skill: string, idx: number) => (
-                              <span key={idx} className="px-2 py-0.5 rounded text-[11px] bg-emerald-950/80 text-emerald-300 border border-emerald-800/60">
+                              <span key={idx} className="px-2 py-0.5 rounded text-[11px] bg-emerald-50 text-emerald-700 border border-emerald-200">
                                 ✓ {skill}
                               </span>
                             ))}
                             {result.softSkills.missing?.map((skill: string, idx: number) => (
-                              <span key={idx} className="px-2 py-0.5 rounded text-[11px] bg-rose-950/80 text-rose-300 border border-rose-800/60">
+                              <span key={idx} className="px-2 py-0.5 rounded text-[11px] bg-rose-50 text-rose-700 border border-rose-200">
                                 ✕ {skill}
                               </span>
                             ))}
@@ -1058,21 +1161,21 @@ export default function Home() {
                     </div>
 
                     {result.recruiterChecks && (
-                      <div className="pt-2 border-t border-slate-800/80 grid grid-cols-1 md:grid-cols-3 gap-2 text-[11px]">
-                        <div className="flex items-center gap-1.5 text-slate-300">
-                          <span className={result.recruiterChecks.hasMeasurableResults ? 'text-emerald-400' : 'text-rose-400'}>
+                      <div className="pt-2 border-t border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-2 text-[11px]">
+                        <div className="flex items-center gap-1.5 text-slate-600">
+                          <span className={result.recruiterChecks.hasMeasurableResults ? 'text-emerald-600' : 'text-rose-500'}>
                             {result.recruiterChecks.hasMeasurableResults ? '✓' : '✕'}
                           </span>
                           <span>Measurable Metrics</span>
                         </div>
                         {result.recruiterChecks.wordCountCheck && (
-                          <div className="text-slate-300">
+                          <div className="text-slate-600">
                             <span className="text-slate-500">Length: </span>
                             {result.recruiterChecks.wordCountCheck}
                           </div>
                         )}
                         {result.recruiterChecks.formattingAlerts?.length > 0 && (
-                          <div className="text-amber-400">
+                          <div className="text-amber-600">
                             ⚠ {result.recruiterChecks.formattingAlerts[0]}
                           </div>
                         )}
@@ -1082,16 +1185,16 @@ export default function Home() {
                 )}
 
                 {/* Resume Output Panel — no boxes, plain text separated by bullets */}
-                <div ref={resumeRef} className={`space-y-4 text-xs text-slate-200 ${pt.font}`}>
-                  <div className={`${pt.headerRule} pb-2`}>
-                    <h1 className={pt.name}>{result.fullName}</h1>
-                    <p className={pt.contact}>{result.contactInfo}</p>
+                <div ref={resumeRef} className={`space-y-4 text-xs text-slate-700 ${pt.font}`}>
+                  <div className={`${pt.headerRule} pb-2 min-w-0`}>
+                    <h1 className={`${pt.name} break-words`}>{result.fullName}</h1>
+                    <p className={`${pt.contact} break-words`}>{result.contactInfo}</p>
                   </div>
 
                   <div className="space-y-1">
                     <div className="flex justify-between items-center">
                       <h4 className={pt.sectionTitle}>Professional Summary</h4>
-                      <button onClick={handleRefineSummary} disabled={refiningSummary} className="text-[10px] text-amber-400">
+                      <button onClick={handleRefineSummary} disabled={refiningSummary} className="text-[10px] text-amber-600">
                         {refiningSummary ? 'Refining...' : '✨ Refine text'}
                       </button>
                     </div>
@@ -1103,7 +1206,7 @@ export default function Home() {
                         setResult((prev: any) => ({ ...prev, summary: updated }));
                         setBuildForm((prev) => ({ ...prev, summary: updated }));
                       }}
-                      className="w-full bg-slate-950/40 p-2 rounded border border-slate-800 text-xs leading-relaxed text-slate-300 outline-none"
+                      className="w-full bg-slate-50 p-2 rounded border border-slate-200 text-xs leading-relaxed text-slate-600 outline-none"
                     >
                       {result.summary}
                     </div>
@@ -1115,13 +1218,13 @@ export default function Home() {
                       {pt.skillChips ? (
                         <div className="flex flex-wrap gap-1.5">
                           {result.skills.map((skill: string, sIdx: number) => (
-                            <span key={sIdx} className="text-[11px] text-slate-200 border border-slate-600 rounded px-1.5 py-0.5">
+                            <span key={sIdx} className="text-[11px] text-slate-700 border border-slate-300 rounded px-1.5 py-0.5">
                               {skill}
                             </span>
                           ))}
                         </div>
                       ) : (
-                        <p className={`text-slate-300 text-[11px] font-mono leading-relaxed ${pt.skillsAlign}`}>
+                        <p className={`text-slate-600 text-[11px] font-mono leading-relaxed ${pt.skillsAlign}`}>
                           {result.skills.join('   •   ')}
                         </p>
                       )}
@@ -1133,11 +1236,11 @@ export default function Home() {
                       <h4 className={pt.sectionTitle}>Professional Experience</h4>
                       {result.experience.map((exp: any, expIdx: number) => (
                         <div key={expIdx} className="space-y-1">
-                          <div className="flex justify-between items-baseline font-bold text-slate-100">
-                            <span>{exp.role} {exp.company && `— ${exp.company}`}</span>
-                            <span className="font-mono text-[11px] text-slate-400">{exp.dates}</span>
+                          <div className="flex flex-wrap justify-between items-baseline gap-x-3 font-bold text-slate-800">
+                            <span className="min-w-0 break-words">{exp.role} {exp.company && `, ${exp.company}`}</span>
+                            <span className="font-mono text-[11px] text-slate-500 shrink-0">{exp.dates}</span>
                           </div>
-                          <ul className="list-disc list-inside space-y-1 pl-1 text-slate-300">
+                          <ul className="list-disc list-inside space-y-1 pl-1 text-slate-600">
                             {exp.bullets?.map((bullet: string, bIdx: number) => (
                               <li key={bIdx} className="leading-relaxed">
                                 {bullet}
@@ -1154,11 +1257,11 @@ export default function Home() {
                       <h4 className={pt.sectionTitle}>Projects</h4>
                       {result.projects.map((proj: any, pIdx: number) => (
                         <div key={pIdx} className="space-y-0.5">
-                          <p className="font-bold text-slate-100">
-                            {proj.title} {proj.role && `— ${proj.role}`}
+                          <p className="font-bold text-slate-800">
+                            {proj.title} {proj.role && `, ${proj.role}`}
                           </p>
                           {proj.description && (
-                            <p className="text-slate-300 leading-relaxed">{proj.description}</p>
+                            <p className="text-slate-600 leading-relaxed">{proj.description}</p>
                           )}
                         </div>
                       ))}
@@ -1169,9 +1272,9 @@ export default function Home() {
                     <div className="space-y-1">
                       <h4 className={pt.sectionTitle}>Education</h4>
                       {result.education.map((edu: any, eIdx: number) => (
-                        <div key={eIdx} className="flex justify-between items-baseline text-slate-200">
-                          <span className="font-bold">{edu.degree} — {edu.institution}</span>
-                          <span className="font-mono text-[11px] text-slate-400">{edu.dates}</span>
+                        <div key={eIdx} className="flex flex-wrap justify-between items-baseline gap-x-3 text-slate-700">
+                          <span className="font-bold min-w-0 break-words">{edu.degree}, {edu.institution}</span>
+                          <span className="font-mono text-[11px] text-slate-500 shrink-0">{edu.dates}</span>
                         </div>
                       ))}
                     </div>
@@ -1186,13 +1289,13 @@ export default function Home() {
 
       {/* Job Tracker Overlay Panel — premium only */}
       {showTrackerPanel && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-6">
-          <div className="bg-slate-900 border border-slate-800 rounded-xl w-full max-w-2xl max-h-[80vh] overflow-y-auto p-5 space-y-4">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-              <h3 className="text-sm font-bold text-white">Job Application Tracker</h3>
+        <div className="fixed inset-0 bg-slate-900/40 flex items-center justify-center z-50 p-6">
+          <div className="bg-white border border-slate-200 rounded-xl w-full max-w-2xl max-h-[80vh] overflow-y-auto p-5 space-y-4">
+            <div className="flex justify-between items-center border-b border-slate-200 pb-3">
+              <h3 className="text-sm font-bold text-slate-900">Job Application Tracker</h3>
               <button
                 onClick={() => setShowTrackerPanel(false)}
-                className="text-slate-400 hover:text-white text-xs"
+                className="text-slate-500 hover:text-slate-900 text-xs"
               >
                 ✕ Close
               </button>
@@ -1200,11 +1303,11 @@ export default function Home() {
 
             {!isSubscribed ? (
               <div className="text-center py-8 space-y-3">
-                <p className="text-sm text-slate-300">
+                <p className="text-sm text-slate-600">
                   Job Application Tracking is a premium feature.
                 </p>
                 <p className="text-xs text-slate-500">
-                  Track which resume you sent, the job link, company, and whether you heard back — all in one place.
+                  Track which resume you sent, the job link, company, and whether you heard back, all in one place.
                 </p>
                 <button
                   onClick={() => {
@@ -1219,26 +1322,26 @@ export default function Home() {
             ) : (
               <>
                 {/* Add new application form */}
-                <div className="p-3 bg-slate-950 border border-slate-800 rounded-lg space-y-2">
-                  <p className="text-[11px] uppercase text-slate-400 font-semibold">Add Application</p>
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                  <p className="text-[11px] uppercase text-slate-500 font-semibold">Add Application</p>
                   <div className="grid grid-cols-2 gap-2">
                     <input
                       type="text"
                       placeholder="Company"
-                      className="p-2 bg-slate-900 border border-slate-800 rounded text-xs text-white outline-none"
+                      className="w-full min-w-0 p-2 bg-white border border-slate-200 rounded text-xs text-slate-900 outline-none"
                       value={newApp.company}
                       onChange={(e) => setNewApp({ ...newApp, company: e.target.value })}
                     />
                     <input
                       type="text"
                       placeholder="Job Link"
-                      className="p-2 bg-slate-900 border border-slate-800 rounded text-xs text-white outline-none"
+                      className="w-full min-w-0 p-2 bg-white border border-slate-200 rounded text-xs text-slate-900 outline-none"
                       value={newApp.jobLink}
                       onChange={(e) => setNewApp({ ...newApp, jobLink: e.target.value })}
                     />
                   </div>
                   <select
-                    className="w-full p-2 bg-slate-900 border border-slate-800 rounded text-xs text-white outline-none"
+                    className="w-full p-2 bg-white border border-slate-200 rounded text-xs text-slate-900 outline-none"
                     value={newApp.resumeId}
                     onChange={(e) => setNewApp({ ...newApp, resumeId: e.target.value })}
                   >
@@ -1261,18 +1364,18 @@ export default function Home() {
                   <p className="text-xs text-slate-500 italic py-6 text-center">Loading...</p>
                 ) : applications.length === 0 ? (
                   <p className="text-xs text-slate-500 italic py-6 text-center">
-                    No applications tracked yet — add one above.
+                    No applications tracked yet. Add one above.
                   </p>
                 ) : (
                   <div className="space-y-2">
                     {applications.map((app) => (
                       <div
                         key={app.id}
-                        className="p-3 bg-slate-950 border border-slate-800 rounded-lg space-y-1.5"
+                        className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-1.5"
                       >
                         <div className="flex justify-between items-start gap-2">
                           <div className="min-w-0">
-                            <p className="text-xs font-semibold text-white truncate">
+                            <p className="text-xs font-semibold text-slate-900 truncate">
                               {app.company || 'Untitled Application'}
                             </p>
                             {app.job_link && (
@@ -1280,7 +1383,7 @@ export default function Home() {
                                 href={app.job_link}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-[10px] text-amber-400 hover:underline truncate block"
+                                className="text-[10px] text-amber-600 hover:underline truncate block"
                               >
                                 {app.job_link}
                               </a>
@@ -1291,7 +1394,7 @@ export default function Home() {
                           </div>
                           <button
                             onClick={() => handleDeleteApplication(app.id)}
-                            className="text-[10px] text-rose-400 hover:text-rose-300 shrink-0"
+                            className="text-[10px] text-rose-500 hover:text-rose-700 shrink-0"
                           >
                             Delete
                           </button>
@@ -1299,7 +1402,7 @@ export default function Home() {
                         <select
                           value={app.status}
                           onChange={(e) => handleUpdateApplicationStatus(app.id, e.target.value)}
-                          className="text-[10px] bg-slate-900 border border-slate-800 rounded px-2 py-1 text-slate-300 outline-none"
+                          className="text-[10px] bg-white border border-slate-200 rounded px-2 py-1 text-slate-600 outline-none"
                         >
                           <option value="applied">Applied</option>
                           <option value="responded">Responded</option>
@@ -1319,13 +1422,13 @@ export default function Home() {
 
       {/* Saved Resumes Overlay Panel */}
       {showSavedPanel && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-6">
-          <div className="bg-slate-900 border border-slate-800 rounded-xl w-full max-w-lg max-h-[80vh] overflow-y-auto p-5 space-y-3">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-              <h3 className="text-sm font-bold text-white">My Saved Resumes</h3>
+        <div className="fixed inset-0 bg-slate-900/40 flex items-center justify-center z-50 p-6">
+          <div className="bg-white border border-slate-200 rounded-xl w-full max-w-lg max-h-[80vh] overflow-y-auto p-5 space-y-3">
+            <div className="flex justify-between items-center border-b border-slate-200 pb-3">
+              <h3 className="text-sm font-bold text-slate-900">My Saved Resumes</h3>
               <button
                 onClick={() => setShowSavedPanel(false)}
-                className="text-slate-400 hover:text-white text-xs"
+                className="text-slate-500 hover:text-slate-900 text-xs"
               >
                 ✕ Close
               </button>
@@ -1342,10 +1445,10 @@ export default function Home() {
                 {savedResumes.map((r) => (
                   <div
                     key={r.id}
-                    className="flex items-center justify-between p-3 bg-slate-950 border border-slate-800 rounded-lg"
+                    className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-lg"
                   >
                     <div className="min-w-0">
-                      <p className="text-xs font-semibold text-white truncate">{r.title}</p>
+                      <p className="text-xs font-semibold text-slate-900 truncate">{r.title}</p>
                       <p className="text-[10px] text-slate-500">
                         {new Date(r.updated_at).toLocaleDateString()}
                       </p>
@@ -1359,7 +1462,7 @@ export default function Home() {
                       </button>
                       <button
                         onClick={() => handleDeleteSavedResume(r.id)}
-                        className="text-[10px] text-rose-400 hover:text-rose-300 px-2 py-1"
+                        className="text-[10px] text-rose-500 hover:text-rose-700 px-2 py-1"
                       >
                         Delete
                       </button>
@@ -1373,15 +1476,15 @@ export default function Home() {
       )}
 
       {/* Site Footer */}
-      <footer className="max-w-7xl mx-auto mt-10 border-t border-slate-800 pt-5 pb-2 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <footer className="max-w-7xl mx-auto mt-10 border-t border-slate-200 pt-5 pb-2 flex flex-col sm:flex-row items-center justify-between gap-3">
         <p className="text-[11px] text-slate-500">
-          Enhancerez<span className="text-amber-400">.com</span> — AI Resume Builder
+          Enhancerez<span className="text-amber-600">.com</span>, AI Resume Builder
         </p>
-        <nav className="flex items-center gap-4 text-[11px] text-slate-400">
-          <Link href="/pricing" className="hover:text-amber-400 transition">Pricing</Link>
-          <Link href="/terms" className="hover:text-amber-400 transition">Terms</Link>
-          <Link href="/privacy" className="hover:text-amber-400 transition">Privacy</Link>
-          <Link href="/contact" className="hover:text-amber-400 transition">Contact</Link>
+        <nav className="flex items-center gap-4 text-[11px] text-slate-500">
+          <Link href="/pricing" className="hover:text-amber-600 transition">Pricing</Link>
+          <Link href="/terms" className="hover:text-amber-600 transition">Terms</Link>
+          <Link href="/privacy" className="hover:text-amber-600 transition">Privacy</Link>
+          <Link href="/contact" className="hover:text-amber-600 transition">Contact</Link>
         </nav>
       </footer>
     </main>
