@@ -68,6 +68,7 @@ export default function ContactPage() {
         </p>
         <nav className="flex items-center gap-4 text-[11px] text-slate-500">
           <Link href="/pricing" className="hover:text-amber-600 transition">Pricing</Link>
+          <Link href="/blog" className="hover:text-amber-600 transition">Blog</Link>
           <Link href="/terms" className="hover:text-amber-600 transition">Terms</Link>
           <Link href="/privacy" className="hover:text-amber-600 transition">Privacy</Link>
           <Link href="/contact" className="hover:text-amber-600 transition">Contact</Link>
