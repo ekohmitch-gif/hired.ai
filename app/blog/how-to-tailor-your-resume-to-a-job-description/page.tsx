@@ -183,7 +183,7 @@ export default function TailorResumeArticlePage() {
             (&quot;Experience,&quot; &quot;Education,&quot; &quot;Skills&quot;), a common font, and
             no tables, text boxes, headers or footers with key information, or graphics. Save as
             PDF unless the posting asks for a Word document. And proofread. A tailored resume with
-            a typo in the employer&apos;s own keyword is a special kind of self own.
+            a typo in the employer&apos;s own keyword is a special kind of own goal.
           </P>
 
           <StepHeading>Step 7: Check your match before you send</StepHeading>
