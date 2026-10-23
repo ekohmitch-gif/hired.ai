@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import SubscribeForm from './SubscribeForm';
 
 export const metadata: Metadata = {
   title: 'Blog, EnhanceRez | AI Resume Builder',
@@ -67,6 +68,8 @@ export default function BlogIndexPage() {
             </Link>
           ))}
         </div>
+
+        <SubscribeForm />
       </div>
 
       {/* Site Footer */}

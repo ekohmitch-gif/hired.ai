@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import SubscribeForm from '../SubscribeForm';
 
 const ARTICLE_TITLE =
   'How to Tailor Your Resume to a Job Description (So It Passes the ATS)';
@@ -243,6 +244,10 @@ export default function TailorResumeArticlePage() {
             </p>
           </div>
         </article>
+
+        <div className="pt-8">
+          <SubscribeForm />
+        </div>
       </div>
 
       {/* Site Footer */}

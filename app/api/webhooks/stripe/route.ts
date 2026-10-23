@@ -1,10 +1,33 @@
 import { NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { createClerkClient } from '@clerk/backend';
+import {
+  sendTrialEndingEmail,
+  sendPaymentFailedEmail,
+  sendCancellationEmail,
+} from '@/lib/email';
 
 const clerkClient = createClerkClient({
   secretKey: process.env.CLERK_SECRET_KEY,
 });
+
+// Resolve the email address for a Stripe customer reference (an id
+// string, an expanded customer object, or a deleted customer). Returns
+// null when no address can be found. Used only for lifecycle emails.
+async function getCustomerEmail(customer: any): Promise<string | null> {
+  try {
+    if (!customer) return null;
+    if (typeof customer === 'object') {
+      return customer.email ?? null;
+    }
+    const retrieved: any = await stripe.customers.retrieve(customer);
+    if (retrieved && !retrieved.deleted) return retrieved.email ?? null;
+    return null;
+  } catch (err) {
+    console.error('Could not resolve Stripe customer email:', err);
+    return null;
+  }
+}
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -72,6 +95,58 @@ export async function POST(req: Request) {
             : { credits: 3, creditsResetAt: new Date().toISOString() }),
         },
       });
+    }
+  }
+
+  // Lifecycle emails. These blocks only read the event and send mail;
+  // they do not change any existing webhook behavior above.
+
+  if (event.type === 'customer.subscription.trial_will_end') {
+    try {
+      const subscription = event.data.object as any;
+      const email = await getCustomerEmail(subscription.customer);
+      if (email) {
+        const trialEndDate = subscription.trial_end
+          ? new Date(subscription.trial_end * 1000).toLocaleDateString(
+              'en-US',
+              {
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric',
+                timeZone: 'UTC',
+              }
+            )
+          : null;
+        await sendTrialEndingEmail(email, trialEndDate);
+      }
+    } catch (err) {
+      console.error('Trial ending email failed:', err);
+    }
+  }
+
+  if (event.type === 'invoice.payment_failed') {
+    try {
+      const invoice = event.data.object as any;
+      const email =
+        invoice.customer_email ||
+        (await getCustomerEmail(invoice.customer));
+      if (email) {
+        await sendPaymentFailedEmail(email);
+      }
+    } catch (err) {
+      console.error('Payment failed email failed:', err);
+    }
+  }
+
+  if (event.type === 'customer.subscription.deleted') {
+    try {
+      const subscription = event.data.object as any;
+      const email = await getCustomerEmail(subscription.customer);
+      if (email) {
+        await sendCancellationEmail(email);
+      }
+    } catch (err) {
+      console.error('Cancellation email failed:', err);
     }
   }
 
