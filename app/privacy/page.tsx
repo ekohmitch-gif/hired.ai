@@ -59,6 +59,11 @@ export default function PrivacyPage() {
               Stripe. We never see or store your full card number; Stripe gives us confirmation of
               payment and subscription status.
             </p>
+            <p>
+              <strong className="text-slate-900">Blog subscriptions.</strong> If you subscribe to
+              the blog, we store your email address so we can send you new articles. Subscribing
+              is optional and is separate from having an account.
+            </p>
           </Section>
 
           <Section title="How we use it">
@@ -67,14 +72,19 @@ export default function PrivacyPage() {
               generate cover letters, save the documents you ask us to keep, track your download
               credits, and manage your subscription.
             </p>
+            <p>
+              If you subscribe to the blog, we use your email address only to send you new
+              articles. We email only people who subscribed, and you can unsubscribe at any time
+              from a link in those emails.
+            </p>
           </Section>
 
           <Section title="Who processes it">
             <p>
               A few providers process data on our behalf, only so the service works: Clerk
               (authentication), OpenAI (AI processing of the resume and job description text you
-              submit), Stripe (payments), and Neon (database hosting for saved resumes and
-              applications). We do not sell your personal information.
+              submit), Stripe (payments), Neon (database hosting for saved resumes and
+              applications), and Resend (email delivery). We do not sell your personal information.
             </p>
           </Section>
 
