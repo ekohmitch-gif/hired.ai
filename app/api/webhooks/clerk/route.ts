@@ -33,11 +33,15 @@ export async function POST(req: Request) {
 
   let event: any;
   try {
-    event = new Webhook(secret).verify(payload, {
+    // The installed svix version validates the signature and throws on
+    // failure, but its verify returns undefined, so the event itself is
+    // read from the verified payload.
+    new Webhook(secret).verify(payload, {
       'svix-id': svixId,
       'svix-timestamp': svixTimestamp,
       'svix-signature': svixSignature,
     });
+    event = JSON.parse(payload);
   } catch (err) {
     console.error('Clerk webhook signature verification failed:', err);
     return NextResponse.json(
