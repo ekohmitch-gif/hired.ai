@@ -32,7 +32,7 @@ export function ensureBlogSubscribersTable(): Promise<void> {
 // route reads CLERK_SECRET_KEY), so no new secret is required. A link
 // can only unsubscribe the exact address it was minted for.
 function unsubscribeSecret(): string {
-  const secret = <redacted>
+  const secret = process.env.CLERK_SECRET_KEY;
   if (!secret) {
     throw new Error('CLERK_SECRET_KEY is not set.');
   }
