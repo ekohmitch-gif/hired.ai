@@ -117,7 +117,7 @@ export default function ItServicesPage() {
             Mitchell Ekoh IT Services
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight leading-tight">
-            Computer help from a person you can look up.
+            Local computer help, done right the first time.
           </h1>
           <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl">
             I am Mitchell Ekoh. I hold a Bachelor of Science in Computer Science and
