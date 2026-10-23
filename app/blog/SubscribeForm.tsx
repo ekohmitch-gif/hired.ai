@@ -23,7 +23,7 @@ export default function SubscribeForm() {
       if (res.ok) {
         setStatus('done');
         setMessage(
-          'You are subscribed. A confirmation email is on its way to you.'
+          'You are subscribed.'
         );
       } else {
         setStatus('error');

@@ -20,6 +20,9 @@ export function ensureBlogSubscribersTable(): Promise<void> {
         )
       `;
     })();
+    tableReady.catch(() => {
+      tableReady = null;
+    });
   }
   return tableReady;
 }
@@ -29,7 +32,11 @@ export function ensureBlogSubscribersTable(): Promise<void> {
 // route reads CLERK_SECRET_KEY), so no new secret is required. A link
 // can only unsubscribe the exact address it was minted for.
 function unsubscribeSecret(): string {
-  return process.env.CLERK_SECRET_KEY || '';
+  const secret = <redacted>
+  if (!secret) {
+    throw new Error('CLERK_SECRET_KEY is not set.');
+  }
+  return secret;
 }
 
 export function unsubscribeToken(email: string): string {
@@ -47,7 +54,12 @@ export function unsubscribeUrl(email: string): string {
 }
 
 export function verifyUnsubscribeToken(email: string, token: string): boolean {
-  const expected = Buffer.from(unsubscribeToken(email));
+  let expected: Buffer;
+  try {
+    expected = Buffer.from(unsubscribeToken(email));
+  } catch {
+    return false;
+  }
   const provided = Buffer.from(token || '');
   if (expected.length !== provided.length) return false;
   return crypto.timingSafeEqual(expected, provided);
