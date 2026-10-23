@@ -66,7 +66,7 @@ const PRICING = [
   },
   {
     amount: '$59 per month',
-    body: 'Care plan per user for small offices, with priority help, update checks, and backup monitoring. No contract. Hardware is always at cost, with the receipt shown.',
+    body: 'Care plan per user for small offices, with priority help, update checks, and backup monitoring. No contract. Three user minimum. Care plan members get on site visits at $60 per hour. Hardware is always at cost, with the receipt shown.',
   },
 ];
 
