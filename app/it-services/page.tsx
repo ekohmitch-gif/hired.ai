@@ -77,6 +77,98 @@ const STEPS = [
   'If something is not worth fixing, I tell you that instead of billing you for it.',
 ];
 
+const LOCAL_BUSINESS_JSON_LD = {
+  '@context': 'https://schema.org',
+  '@type': 'ComputerRepair',
+  name: 'Mitchell Ekoh IT Services',
+  url: PAGE_URL,
+  telephone: '+1-470-834-2676',
+  email: 'ekoh.mitch@gmail.com',
+  priceRange: '$$',
+  description:
+    'Computer setup, repair, WiFi, and small business security help in Columbus and the Atlanta metro. Flat quotes before work begins.',
+  founder: {
+    '@type': 'Person',
+    name: 'Mitchell Ekoh',
+    jobTitle: 'Owner',
+    hasCredential: {
+      '@type': 'EducationalOccupationalCredential',
+      credentialCategory: 'degree',
+      name: 'Bachelor of Science in Computer Science and Cybersecurity',
+    },
+  },
+  areaServed: [
+    'Columbus, GA',
+    'Phenix City, AL',
+    'Tucker, GA',
+    'Decatur, GA',
+    'Stone Mountain, GA',
+    'Atlanta, GA',
+  ],
+  openingHoursSpecification: [
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      opens: '08:00',
+      closes: '18:00',
+    },
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: 'Saturday',
+      opens: '09:00',
+      closes: '14:00',
+    },
+  ],
+  hasOfferCatalog: {
+    '@type': 'OfferCatalog',
+    name: 'IT services pricing',
+    itemListElement: [
+      {
+        '@type': 'Offer',
+        itemOffered: { '@type': 'Service', name: 'Hourly computer support' },
+        priceSpecification: {
+          '@type': 'UnitPriceSpecification',
+          price: 75,
+          priceCurrency: 'USD',
+          unitText: 'HUR',
+        },
+      },
+      {
+        '@type': 'Offer',
+        itemOffered: { '@type': 'Service', name: 'Small Business Security Checkup' },
+        priceSpecification: {
+          '@type': 'PriceSpecification',
+          price: 249,
+          priceCurrency: 'USD',
+        },
+      },
+      {
+        '@type': 'Offer',
+        itemOffered: { '@type': 'Service', name: 'New Computer Setup' },
+        priceSpecification: {
+          '@type': 'PriceSpecification',
+          price: 129,
+          priceCurrency: 'USD',
+        },
+      },
+      {
+        '@type': 'Offer',
+        itemOffered: { '@type': 'Service', name: 'Care Plan' },
+        priceSpecification: {
+          '@type': 'UnitPriceSpecification',
+          price: 59,
+          priceCurrency: 'USD',
+          unitText: 'MON',
+        },
+      },
+    ],
+  },
+  makesOffer: SERVICES.map((service) => ({
+    '@type': 'Offer',
+    itemOffered: { '@type': 'Service', name: service.title },
+  })),
+};
+
 function CallButtons() {
   return (
     <div className="flex flex-wrap gap-3">
@@ -99,6 +191,10 @@ function CallButtons() {
 export default function ItServicesPage() {
   return (
     <main className="min-h-screen bg-[#FAFAF9] text-slate-800 font-sans antialiased px-4 py-6 sm:px-6 sm:py-10">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(LOCAL_BUSINESS_JSON_LD) }}
+      />
       <div className="max-w-5xl mx-auto space-y-8">
         <header className="flex justify-between items-center border-b border-slate-200 pb-4">
           <Link href="/" className="text-2xl font-bold font-serif text-slate-900">
