@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     title: 'Blog, EnhanceRez | AI Resume Builder',
     description:
       'Practical guides from EnhanceRez on resumes and job applications, starting with how to tailor your resume to a job description so it passes the ATS.',
-    url: 'https://enhancerez.com/blog',
+    url: 'https://www.enhancerez.com/blog',
     siteName: 'EnhanceRez',
     type: 'website',
   },

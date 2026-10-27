@@ -5,7 +5,7 @@ const PAGE_TITLE =
   'Mitchell Ekoh IT Services, Computer Help in Columbus and Atlanta | EnhanceRez';
 const PAGE_DESCRIPTION =
   'Computer setup, repair, WiFi, and small business security help in Columbus and the Atlanta metro. Flat quotes first. Call or text (470) 834 2676.';
-const PAGE_URL = 'https://enhancerez.com/it-services';
+const PAGE_URL = 'https://www.enhancerez.com/it-services';
 
 export const metadata: Metadata = {
   title: PAGE_TITLE,
@@ -294,7 +294,7 @@ export default function ItServicesPage() {
               Call or text (470) 834 2676
             </a>
             <a
-              href="https://enhancerez.com"
+              href="https://www.enhancerez.com"
               className="inline-block bg-white text-slate-700 font-semibold text-sm px-5 py-3 rounded-lg border border-slate-300 hover:bg-slate-100 transition"
             >
               Visit enhancerez.com

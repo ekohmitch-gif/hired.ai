@@ -7,7 +7,7 @@ const ARTICLE_TITLE =
 const ARTICLE_DESCRIPTION =
   "Learn how to tailor your resume to a job description: mirror the posting's language, lead with measurable results, and check your match before you send.";
 const ARTICLE_URL =
-  'https://enhancerez.com/blog/how-to-tailor-your-resume-to-a-job-description';
+  'https://www.enhancerez.com/blog/how-to-tailor-your-resume-to-a-job-description';
 
 export const metadata: Metadata = {
   title: `${ARTICLE_TITLE} | EnhanceRez`,
