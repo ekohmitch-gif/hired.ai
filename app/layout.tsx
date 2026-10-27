@@ -10,13 +10,13 @@ const SITE_DESCRIPTION =
   'Build ATS-optimized resumes in minutes with AI. Scan your resume against any job description for a match score, get a tailored rewrite, and generate a matching cover letter.';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://enhancerez.com'),
+  metadataBase: new URL('https://www.enhancerez.com'),
   title: 'EnhanceRez | AI Resume Builder',
   description: SITE_DESCRIPTION,
   openGraph: {
     title: 'EnhanceRez | AI Resume Builder',
     description: SITE_DESCRIPTION,
-    url: 'https://enhancerez.com',
+    url: 'https://www.enhancerez.com',
     siteName: 'EnhanceRez',
     type: 'website',
   },
