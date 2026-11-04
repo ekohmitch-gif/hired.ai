@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const primaryButtonClass =
   'block w-full rounded-full bg-stone-900 px-6 py-4 text-center text-base font-semibold text-white transition hover:bg-black disabled:opacity-60';
@@ -15,13 +15,11 @@ export default function CustomerFlow({
   token,
   businessName,
   jobDescription,
-  googleReviewUrl,
   initialStatus,
 }: {
   token: string;
   businessName: string;
   jobDescription: string | null;
-  googleReviewUrl: string;
   initialStatus: string;
 }) {
   const [stage, setStage] = useState<Stage>(initialStatus === 'sent' ? 'choose' : 'already');
@@ -29,6 +27,35 @@ export default function CustomerFlow({
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
   const [notice, setNotice] = useState('');
+  // The Google review link is never part of the page payload. It is
+  // only handed out by the happy POST response, after the customer
+  // has chosen the great path.
+  const [googleReviewUrl, setGoogleReviewUrl] = useState<string | null>(null);
+  const happyFetchStarted = useRef(false);
+
+  // A customer who already chose the great path on an earlier visit
+  // still needs the button, so fetch the link once on mount through
+  // the same happy POST a fresh great choice would make.
+  useEffect(() => {
+    if (initialStatus !== 'happy' || happyFetchStarted.current) return;
+    happyFetchStarted.current = true;
+    (async () => {
+      try {
+        const res = await fetch(`/api/review-engine/public/${token}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'happy' }),
+        });
+        if (!res.ok) return;
+        const data = await res.json().catch(() => ({}));
+        if (typeof data.googleReviewUrl === 'string' && data.googleReviewUrl) {
+          setGoogleReviewUrl(data.googleReviewUrl);
+        }
+      } catch {
+        // The thank you message still shows, just without the button.
+      }
+    })();
+  }, [initialStatus, token]);
 
   const chooseGreat = async () => {
     setBusy(true);
@@ -39,10 +66,13 @@ export default function CustomerFlow({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'happy' }),
       });
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
         setNotice(data.error || 'Something went wrong. Please try again.');
         return;
+      }
+      if (typeof data.googleReviewUrl === 'string' && data.googleReviewUrl) {
+        setGoogleReviewUrl(data.googleReviewUrl);
       }
       setStage('great');
     } catch {
@@ -82,7 +112,7 @@ export default function CustomerFlow({
         <p className="text-sm leading-relaxed text-stone-500">
           You have already answered this one, and {businessName} has your response. We appreciate you taking the time.
         </p>
-        {initialStatus === 'happy' && (
+        {initialStatus === 'happy' && googleReviewUrl && (
           <a href={googleReviewUrl} target="_blank" rel="noopener noreferrer" className={primaryButtonClass}>
             Leave a Google review
           </a>
@@ -98,9 +128,11 @@ export default function CustomerFlow({
         <p className="text-sm leading-relaxed text-stone-500">
           It means a lot to {businessName}. If you have a minute, a Google review helps other neighbours find the shop and helps the team more than almost anything else.
         </p>
-        <a href={googleReviewUrl} target="_blank" rel="noopener noreferrer" className={primaryButtonClass}>
-          Leave a Google review
-        </a>
+        {googleReviewUrl && (
+          <a href={googleReviewUrl} target="_blank" rel="noopener noreferrer" className={primaryButtonClass}>
+            Leave a Google review
+          </a>
+        )}
         <p className="text-xs text-stone-500">The button opens Google in a new tab. Nothing is posted for you.</p>
       </div>
     );

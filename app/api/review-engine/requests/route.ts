@@ -1,7 +1,12 @@
 import crypto from 'crypto';
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { getShopByOwner, createRequest, listRequests } from '@/lib/review-engine';
+import {
+  getShopByOwner,
+  createRequest,
+  updateRequestSmsStatus,
+  listRequests,
+} from '@/lib/review-engine';
 import { sendSms } from '@/lib/sms';
 
 function errorMessage() {
@@ -60,7 +65,19 @@ export async function POST(req: Request) {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.enhancerez.com';
     const link = `${siteUrl}/r/${token}`;
 
-    let smsStatus = 'no_phone';
+    // Persist the request row before any text goes out, so a customer
+    // never receives a link that points at a request that does not
+    // exist. The row starts as pending and the send result is written
+    // back onto it once the text has been attempted.
+    const created = await createRequest(shop.id, {
+      token,
+      customerName,
+      customerPhone: customerPhone || null,
+      jobDescription: jobDescription || null,
+      smsStatus: customerPhone ? 'pending' : 'no_phone',
+    });
+
+    let request = created;
     if (customerPhone) {
       const firstName = customerName.split(/\s+/)[0];
       const jobLine = jobDescription ? ` for ${jobDescription}` : '';
@@ -68,16 +85,10 @@ export async function POST(req: Request) {
         customerPhone,
         `Hi ${firstName}, thanks for choosing ${shop.business_name}. How did we do${jobLine}? Tell us here: ${link}`
       );
-      smsStatus = result.sent ? 'sent' : result.reason || 'send_failed';
+      const smsStatus = result.sent ? 'sent' : result.reason || 'send_failed';
+      const updated = await updateRequestSmsStatus(created.id, smsStatus);
+      if (updated) request = updated;
     }
-
-    const request = await createRequest(shop.id, {
-      token,
-      customerName,
-      customerPhone: customerPhone || null,
-      jobDescription: jobDescription || null,
-      smsStatus,
-    });
 
     return NextResponse.json({ request: { ...request, link } });
   } catch (error) {

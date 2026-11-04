@@ -100,17 +100,18 @@ export async function POST(
         });
         await markRequestStatus(token, 'feedback');
 
-        // Fire the owner alert without letting email hold up or break
-        // the customer response. sendEmail never throws, and the extra
-        // catch keeps that guarantee even if this wrapper changes.
-        void sendFeedbackAlertEmail({
+        // Await the owner alert before responding, the same way every
+        // other email call site in this repo does. sendEmail never
+        // rejects, so awaiting cannot break the customer response, and
+        // it guarantees the send is not cut short by the runtime.
+        await sendFeedbackAlertEmail({
           ownerEmail: request.owner_email,
           ownerName: request.owner_name,
           businessName: request.business_name,
           customerName: name,
           message,
           jobDescription: request.job_description,
-        }).catch(() => undefined);
+        });
       }
 
       return NextResponse.json({ status: 'feedback' });

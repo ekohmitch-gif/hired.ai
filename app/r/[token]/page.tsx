@@ -37,7 +37,6 @@ export default async function CustomerPage({
             token={token}
             businessName={request.business_name}
             jobDescription={request.job_description}
-            googleReviewUrl={request.google_review_url}
             initialStatus={request.status}
           />
         ) : (

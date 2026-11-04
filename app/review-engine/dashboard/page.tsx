@@ -72,12 +72,12 @@ function formatDate(value: string | null): string {
 }
 
 function statusLabel(status: string): string {
-  if (status === 'happy') return 'Went to Google';
+  if (status === 'happy') return 'Chose Google review';
   if (status === 'feedback') return 'Sent private feedback';
   if (status === 'drafted') return 'Draft ready';
   if (status === 'approved') return 'Approved';
   if (status === 'new') return 'New';
-  return 'Sent';
+  return 'Waiting for reply';
 }
 
 function CopyButton({ text, label }: { text: string; label: string }) {
@@ -582,7 +582,9 @@ export default function DashboardPage() {
                 <p className="text-sm leading-relaxed text-stone-700">
                   {sendResult.smsStatus === 'no_phone'
                     ? 'No mobile number was added, so here is the customer link to send yourself.'
-                    : 'Automatic texting is not switched on yet, copy the link and send it from your own phone.'}
+                    : sendResult.smsStatus === 'send_failed'
+                      ? 'We tried to send the text, but it did not go through. Copy the link and send it from your own phone.'
+                      : 'Automatic texting is not switched on yet, copy the link and send it from your own phone.'}
                 </p>
                 <div className="flex flex-wrap items-center gap-2">
                   <code className="max-w-full overflow-x-auto rounded-full bg-[#F2EBDF] px-4 py-2 text-xs text-stone-800">{sendResult.link}</code>

@@ -64,6 +64,24 @@ export async function POST(req: Request) {
     }
 
     const reviewDate = clean(body.reviewDate);
+    if (reviewDate) {
+      const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(reviewDate);
+      const parsed = match
+        ? new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])))
+        : null;
+      const isRealDate =
+        parsed !== null &&
+        parsed.getUTCFullYear() === Number(match?.[1]) &&
+        parsed.getUTCMonth() === Number(match?.[2]) - 1 &&
+        parsed.getUTCDate() === Number(match?.[3]);
+      if (!isRealDate) {
+        return NextResponse.json(
+          { error: 'Review date must be a real date in YYYY-MM-DD format.' },
+          { status: 400 }
+        );
+      }
+    }
+
     const review = await addReview({
       shopId: shop.id,
       reviewerName: clean(body.reviewerName) || null,

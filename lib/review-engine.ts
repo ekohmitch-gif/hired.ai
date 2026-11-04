@@ -9,7 +9,6 @@ let tablesReady: Promise<void> | null = null;
 export function ensureReviewEngineTables(): Promise<void> {
   if (!tablesReady) {
     tablesReady = (async () => {
-      await sql`CREATE EXTENSION IF NOT EXISTS pgcrypto`;
       await sql`
         CREATE TABLE IF NOT EXISTS re_shops (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -223,6 +222,20 @@ export async function createRequest(
   return rows[0] as RequestRow;
 }
 
+export async function updateRequestSmsStatus(
+  id: string,
+  smsStatus: string
+): Promise<RequestRow | null> {
+  await ensureReviewEngineTables();
+  const { rows } = await sql`
+    UPDATE re_requests
+    SET sms_status = ${smsStatus}
+    WHERE id = ${id}
+    RETURNING *
+  `;
+  return (rows[0] as RequestRow) || null;
+}
+
 export async function getRequestByToken(token: string): Promise<PublicRequestRow | null> {
   await ensureReviewEngineTables();
   const { rows } = await sql`
@@ -280,12 +293,23 @@ export async function listFeedback(shopId: string): Promise<FeedbackRow[]> {
   return rows as FeedbackRow[];
 }
 
-export async function getFeedbackById(id: string, shopId: string): Promise<FeedbackRow | null> {
+export interface FeedbackWithJobRow extends FeedbackRow {
+  job_description: string | null;
+}
+
+export async function getFeedbackById(
+  id: string,
+  shopId: string
+): Promise<FeedbackWithJobRow | null> {
   await ensureReviewEngineTables();
   const { rows } = await sql`
-    SELECT * FROM re_feedback WHERE id = ${id} AND shop_id = ${shopId} LIMIT 1
+    SELECT f.*, r.job_description AS job_description
+    FROM re_feedback f
+    LEFT JOIN re_requests r ON r.id = f.request_id
+    WHERE f.id = ${id} AND f.shop_id = ${shopId}
+    LIMIT 1
   `;
-  return (rows[0] as FeedbackRow) || null;
+  return (rows[0] as FeedbackWithJobRow) || null;
 }
 
 export async function addReview(input: {

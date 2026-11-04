@@ -27,6 +27,7 @@ export async function POST(
       businessName: shop.business_name,
       reviewerName: feedback.customer_name,
       text: feedback.message,
+      jobDescription: feedback.job_description,
     });
     if (!draft) {
       return NextResponse.json(
