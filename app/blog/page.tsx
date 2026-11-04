@@ -5,11 +5,11 @@ import SubscribeForm from './SubscribeForm';
 export const metadata: Metadata = {
   title: 'Blog, EnhanceRez | AI Resume Builder',
   description:
-    'Practical guides from EnhanceRez on resumes and job applications, starting with how to tailor your resume to a job description so it passes the ATS.',
+    'Practical guides from EnhanceRez on resumes and job applications, covering how to tailor your resume, understand ATS match scores, use resume keywords honestly, and judge AI resume builders.',
   openGraph: {
     title: 'Blog, EnhanceRez | AI Resume Builder',
     description:
-      'Practical guides from EnhanceRez on resumes and job applications, starting with how to tailor your resume to a job description so it passes the ATS.',
+      'Practical guides from EnhanceRez on resumes and job applications, covering how to tailor your resume, understand ATS match scores, use resume keywords honestly, and judge AI resume builders.',
     url: 'https://www.enhancerez.com/blog',
     siteName: 'EnhanceRez',
     type: 'website',
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     card: 'summary',
     title: 'Blog, EnhanceRez | AI Resume Builder',
     description:
-      'Practical guides from EnhanceRez on resumes and job applications, starting with how to tailor your resume to a job description so it passes the ATS.',
+      'Practical guides from EnhanceRez on resumes and job applications, covering how to tailor your resume, understand ATS match scores, use resume keywords honestly, and judge AI resume builders.',
   },
 };
 
@@ -28,6 +28,24 @@ const ARTICLES = [
     title: 'How to Tailor Your Resume to a Job Description (So It Passes the ATS)',
     description:
       'A step by step guide to matching your resume to each posting: mirror the language, lead with results, and check your match before you send.',
+  },
+  {
+    href: '/blog/what-is-a-good-ats-match-score',
+    title: 'What Is a Good ATS Match Score? (And What to Do If Yours Is Low)',
+    description:
+      'What a match score measures, what the ranges tend to mean, why a perfect score is not the goal, and the honest steps to raise a low score.',
+  },
+  {
+    href: '/blog/resume-keywords',
+    title: 'Resume Keywords: What They Are, Where to Find Them, and How to Use Them',
+    description:
+      'What keywords are, where to mine them from a posting, how to place them naturally in your summary, skills, and bullets, and why stuffing hurts.',
+  },
+  {
+    href: '/blog/are-ai-resume-builders-worth-it',
+    title: 'Are AI Resume Builders Worth It? An Honest Look at What They Can and Cannot Do',
+    description:
+      'What AI builders help with, what they cannot do, why fabricated detail is the main risk, and how to evaluate one before you pay.',
   },
 ];
 
