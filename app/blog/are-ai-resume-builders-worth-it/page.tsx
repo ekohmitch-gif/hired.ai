@@ -77,7 +77,7 @@ export default function AiResumeBuildersArticlePage() {
           <P>
             Speed is the clearest benefit. Starting from a blank page is slow, and revising a resume
             for each posting is slower. A builder can take your existing resume and a job
-            description and produce a structured draft quickly, reorganised around what that
+            description and produce a structured draft quickly, reorganized around what that
             employer asked for. That draft is a starting point you can edit.
           </P>
           <P>
@@ -117,7 +117,7 @@ export default function AiResumeBuildersArticlePage() {
             against your own record.
           </P>
           <P>
-            Finally, a builder cannot replace proofreading and judgement. It cannot tell whether a
+            Finally, a builder cannot replace proofreading and judgment. It cannot tell whether a
             bullet will sound credible to a manager in your field, or whether you would be
             comfortable being questioned on a line in an interview. Those calls need a human
             reader, and the most important one is you.
@@ -143,7 +143,7 @@ export default function AiResumeBuildersArticlePage() {
                 A line to question
               </p>
               <p className="text-sm sm:text-[15px] leading-7 text-slate-600">
-                &quot;Improved team efficiency by 35 percent through process optimisation.&quot;
+                &quot;Improved team efficiency by 35 percent through process optimization.&quot;
               </p>
             </div>
             <div className="bg-white border border-amber-300 rounded-xl p-4 space-y-1 shadow-sm">
@@ -152,7 +152,7 @@ export default function AiResumeBuildersArticlePage() {
               </p>
               <p className="text-sm sm:text-[15px] leading-7 text-slate-800">
                 Did you measure a 35 percent change, can you describe the process you changed, and
-                would your former manager recognise this description of your work.
+                would your former manager recognize this description of your work.
               </p>
             </div>
           </div>
@@ -177,9 +177,9 @@ export default function AiResumeBuildersArticlePage() {
             starting a checkout. Clear pricing is a basic sign of respect for the person paying.
           </P>
           <P>
-            Third, does it rewrite only from your content. The safest tools rephrase and reorganise
+            Third, does it rewrite only from your content. The safest tools rephrase and reorganize
             what you provided and flag what is missing, rather than filling your history with new
-            claims. Read the first draft closely for anything you do not recognise. That first read
+            claims. Read the first draft closely for anything you do not recognize. That first read
             tells you how much checking the tool will require every time you use it.
           </P>
           <ul className="space-y-2">
@@ -212,12 +212,13 @@ export default function AiResumeBuildersArticlePage() {
             <Link href="/" className="text-amber-600 font-semibold hover:underline">
               EnhanceRez
             </Link>{' '}
-            our AI rephrases and restructures from your resume and never adds metrics that are not
-            in your source document. That is a deliberate choice. It means our drafts may sometimes
-            look less dramatic than a draft that invents figures, and we accept that trade because
-            the alternative puts claims in your name that you never made. You should still read
-            every line before sending, because rephrasing can change emphasis and only you know
-            whether the emphasis is right.
+            our system is built and prompted to work only from the content in your source document,
+            and it is instructed never to add metrics that are not already there. That is a
+            deliberate choice. It means our drafts may sometimes look less dramatic than a draft
+            that invents figures, and we accept that trade because the alternative puts claims in
+            your name that you never made. You should still check every number before sending, and
+            read every line, because rephrasing can change emphasis and only you know whether the
+            emphasis is right.
           </P>
           <P>
             The free scan works like this. You paste in your resume and the job description and get
@@ -239,10 +240,12 @@ export default function AiResumeBuildersArticlePage() {
             .
           </P>
           <P>
-            Downloads run on credits. The free tier includes 3 download credits per week, with one
-            credit per unique document. Pro is $12 per month with a 7 day free trial, unlimited
-            downloads, all 3 templates, which are Classic, Modern, and Minimal, plus the Job
-            Application Tracker. There is also a cover letter generator. See{' '}
+            Weigh that cost against doing the same drafting and checking by hand for every
+            application. The scan is free, so the first look costs nothing. Downloads run on
+            credits, and the free tier includes 3 download credits per week, with one credit per
+            unique document. Pro costs $12 per month with a 7 day free trial, and it includes
+            unlimited downloads, all 3 templates, which are Classic, Modern, and Minimal, plus the
+            Job Application Tracker. There is also a cover letter generator. See{' '}
             <Link href="/pricing" className="text-amber-600 font-semibold hover:underline">
               pricing
             </Link>{' '}
@@ -250,8 +253,8 @@ export default function AiResumeBuildersArticlePage() {
           </P>
           <P>
             So, are AI resume builders worth it. For many job seekers, yes, if the job you give the
-            tool is drafting, organising, and checking, and the job you keep for yourself is
-            truth, judgement, and a final read. Used that way, a builder saves time without asking
+            tool is drafting, organizing, and checking, and the job you keep for yourself is
+            truth, judgment, and a final read. Used that way, a builder saves time without asking
             you to trade away accuracy. Used as a replacement for your own knowledge of your work,
             no tool is worth the risk it creates.
           </P>

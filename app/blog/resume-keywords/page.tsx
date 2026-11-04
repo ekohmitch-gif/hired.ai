@@ -66,7 +66,7 @@ export default function ResumeKeywordsArticlePage() {
             missed even when you are qualified.
           </P>
           <P>
-            Used well, keywords are translation. They help a reader recognise your experience
+            Used well, keywords are translation. They help a reader recognize your experience
             quickly and accurately. Used badly, they turn a resume into a list of borrowed phrases
             that no interview could support. This guide covers where keywords come from, where they
             belong on the page, and how to use them without crossing that line.
@@ -80,9 +80,9 @@ export default function ResumeKeywordsArticlePage() {
             customer support, quality checks, or team training.
           </P>
           <P>
-            Keywords matter because two groups rely on them. Applicant tracking systems search
-            resumes by the terms taken from the posting, and recruiters search those systems for
-            candidates with a particular background. When a person reads your resume, they skim
+            Keywords matter because two groups rely on them. Recruiters search applicant tracking
+            systems for candidates using terms drawn from the role they are filling, and postings
+            are where those terms are most visible. When a person reads your resume, they skim
             with those same terms in mind. Matching the language helps at each stage, but only
             when the language is true.
           </P>
@@ -143,8 +143,8 @@ export default function ResumeKeywordsArticlePage() {
             it easy for software to index you and easy for a person to confirm the fit at a glance.
           </P>
           <P>
-            Bullets under each job carry the most weight, because they connect a keyword to
-            evidence. A skill named only in a list is a claim. The same skill inside a bullet that
+            Bullets under each job are where a keyword becomes evidence of real work. A skill
+            named only in a list is a claim. The same skill inside a bullet that
             shows what you did, how often you did it, and what resulted is proof. Wherever you can,
             let your bullets do that work. Our guide on{' '}
             <Link
@@ -160,7 +160,11 @@ export default function ResumeKeywordsArticlePage() {
           <P>
             Imagine a posting for a support role that repeats three phrases. It asks for customer
             support, ticket documentation, and issue resolution, and it mentions handling a high
-            volume of requests. Now imagine your current bullet is honest but vague.
+            volume of requests. Now take a real person whose actual work fits that posting. They
+            did support customers by phone and by email, they resolved common account issues, and
+            they documented each ticket in a system so the next agent could follow the case. Their
+            current bullet, though, says none of that. It is honest but vague, and it hides the
+            facts that matter most.
           </P>
           <div className="grid grid-cols-1 gap-3">
             <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-1">
@@ -182,12 +186,13 @@ export default function ResumeKeywordsArticlePage() {
             </div>
           </div>
           <P>
-            Nothing new has been invented in the second version. No tool has been added, no number
-            has been created, and no duty has been claimed that was not already there. The change is
-            that the work is now described in the terms the employer uses, with enough detail for a
-            reader to picture it. If the person in this example did handle a known volume, they
-            could add that true figure. If they did not track it, the bullet still works without
-            one.
+            Nothing new has been invented in the second version, because every detail in it was
+            stated up front as this person&apos;s real work. No tool has been added, no number has
+            been created, and no duty has been claimed beyond the work they actually did. The
+            change is that the work is now described in the terms the employer uses, with enough
+            detail for a reader to picture it. If the person in this example did handle a known
+            volume, they could add that true figure. If they did not track it, the bullet still
+            works without one.
           </P>
 
           <StepHeading>What keyword stuffing is, and why it hurts</StepHeading>
@@ -240,10 +245,12 @@ export default function ResumeKeywordsArticlePage() {
             .
           </P>
           <P>
-            The scan is free. Downloads run on credits, and the free tier includes 3 download credits
-            per week, with one credit per unique document. Pro is $12 per month with a 7 day free
-            trial, unlimited downloads, all 3 templates, and the Job Application Tracker, and there
-            is a cover letter generator as well. See{' '}
+            Because tailoring is work you repeat for each posting, the pricing follows that rhythm.
+            The scan itself is free. The free tier includes 3 download credits per week for the
+            versions you tailor, and one credit covers each unique document. For people tailoring
+            often, Pro is $12 per month with a 7 day free trial, with unlimited downloads, all 3
+            templates, and the Job Application Tracker, and there is a cover letter generator as
+            well. See{' '}
             <Link href="/pricing" className="text-amber-600 font-semibold hover:underline">
               pricing
             </Link>{' '}

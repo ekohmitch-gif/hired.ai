@@ -69,7 +69,8 @@ export default function AtsMatchScoreArticlePage() {
             Think of it as a comparison tool. It compares the language in your resume with the
             language in one specific job description. Change the posting and the score changes,
             even if your resume stays the same. It tells you how clearly this version answers this
-            posting. It does not grade your career.
+            posting. It does not grade your career. As a rough guide, a score around 70 to 84 is a
+            solid working range for many applications, and no score is a pass or fail line.
           </P>
 
           <StepHeading>What a match score actually measures</StepHeading>
@@ -106,7 +107,7 @@ export default function AtsMatchScoreArticlePage() {
                 <strong className="font-semibold text-slate-800">Below 50,</strong> the resume and
                 the posting are probably speaking different languages, or the core skills in the
                 posting are missing from the page. This is common when you send a general resume to
-                a specialised role.
+                a specialized role.
               </span>
             </li>
             <li className="flex gap-2 text-sm sm:text-[15px] leading-7 text-slate-600">
@@ -145,7 +146,8 @@ export default function AtsMatchScoreArticlePage() {
           <P>
             Chasing 100 creates two risks. The first is overfitting. If you rewrite your resume to
             echo every line of one posting, it can read like the posting itself rather than like
-            your work history. Recruiters notice that, and trust drops.
+            your work history, and a resume that reads like the posting copied back can read as
+            less credible.
           </P>
           <P>
             The second risk is keyword stuffing, which means cramming terms into the page in ways
@@ -189,7 +191,7 @@ export default function AtsMatchScoreArticlePage() {
             Next, translate your language. If the posting says client onboarding and your resume says
             helped new customers get started, and those describe the same work, use the term from
             the posting and keep your detail around it. Translation changes only the label, so a
-            scanner and a recruiter both recognise what you did.
+            scanner and a recruiter both recognize what you did.
           </P>
           <P>
             Then add the numbers you already know. How many people were on the team. How many cases
@@ -241,10 +243,13 @@ export default function AtsMatchScoreArticlePage() {
             not, and check the revised version once more.
           </P>
           <P>
-            The scan is free. Downloads run on credits, and the free tier includes 3 download credits
-            per week, with one credit per unique document. Pro is $12 per month with a 7 day free
-            trial, unlimited downloads, all 3 templates, and the Job Application Tracker. There is
-            also a cover letter generator if the role asks for a letter. See{' '}
+            Scanning is free, so you can check the same resume against several postings and watch
+            how the match moves from role to role before you spend anything. When you are ready to
+            download a version, the free tier includes 3 download credits per week, and each unique
+            document uses one credit. If you are applying widely and scanning often, Pro is $12 per
+            month with a 7 day free trial, and it adds unlimited downloads, all 3 templates, and
+            the Job Application Tracker. There is also a cover letter generator if the role asks
+            for a letter. See{' '}
             <Link href="/pricing" className="text-amber-600 font-semibold hover:underline">
               pricing
             </Link>{' '}
